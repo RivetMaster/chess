@@ -32,4 +32,9 @@ public class ChessPosition {
     public int getColumn() {
         return this.Col;
     }
+
+    @Override
+    public String toString() {
+        return "[" + Row + ", " + Col +"]";
+    }
 }

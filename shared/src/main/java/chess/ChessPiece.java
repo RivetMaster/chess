@@ -56,4 +56,11 @@ public class ChessPiece {
         throw new RuntimeException("Not implemented");
     }
 
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "Color=" + Color +
+                ", Type=" + Type +
+                '}';
+    }
 }
