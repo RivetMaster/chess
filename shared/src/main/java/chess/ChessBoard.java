@@ -65,14 +65,12 @@ public class ChessBoard {
         squares[0][3] = new ChessPiece(WHITE, QUEEN);
         squares[7][3] = new ChessPiece(BLACK, QUEEN);
         //King
-        squares[0][4] = new ChessPiece(WHITE, QUEEN);
-        squares[7][4] = new ChessPiece(BLACK, QUEEN);
+        squares[0][4] = new ChessPiece(WHITE, KING);
+        squares[7][4] = new ChessPiece(BLACK, KING);
         //Pawns
-        for(ChessPiece sq : squares[1]){
-            sq = new ChessPiece(WHITE, PAWN);
-        }
-        for(ChessPiece sq : squares[6]){
-            sq = new ChessPiece(BLACK, PAWN);
+        for(int sq = 0; sq < 8; sq++) {
+            squares[1][sq] = new ChessPiece(WHITE, PAWN);
+            squares[6][sq] = new ChessPiece(BLACK, PAWN);
         }
     }
 
@@ -88,6 +86,28 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
+                        "|%s|%s|%s|%s|%s|%s|%s|%s|",
+        squares[7][0], squares[7][1], squares[7][2], squares[7][3], squares[7][4], squares[7][5], squares[7][6], squares[7][7],
+        squares[6][0], squares[6][1], squares[6][2], squares[6][3], squares[6][4], squares[6][5], squares[6][6], squares[6][7],
+        squares[5][0], squares[5][1], squares[5][2], squares[5][3], squares[5][4], squares[5][5], squares[5][6], squares[5][7],
+        squares[4][0], squares[4][1], squares[4][2], squares[4][3], squares[4][4], squares[4][5], squares[4][6], squares[4][7],
+        squares[3][0], squares[3][1], squares[3][2], squares[3][3], squares[3][4], squares[3][5], squares[3][6], squares[3][7],
+        squares[2][0], squares[2][1], squares[2][2], squares[2][3], squares[2][4], squares[2][5], squares[2][6], squares[2][7],
+        squares[1][0], squares[1][1], squares[1][2], squares[1][3], squares[1][4], squares[1][5], squares[1][6], squares[1][7],
+        squares[0][0], squares[0][1], squares[0][2], squares[0][3], squares[0][4], squares[0][5], squares[0][6], squares[0][7]
+                );
     }
 }
 

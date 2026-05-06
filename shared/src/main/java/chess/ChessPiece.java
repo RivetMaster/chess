@@ -3,6 +3,8 @@ package chess;
 import java.util.Collection;
 import java.util.Objects;
 
+import static chess.ChessGame.TeamColor.*;
+import static chess.ChessPiece.PieceType.*;
 import static chess.ChessPieceMoves.getPieceMoves;
 
 /**
@@ -60,10 +62,22 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return "ChessPiece{" +
-                "Color=" + Color +
-                ", Type=" + Type +
-                '}';
+        if(Color == WHITE){ // uppercase
+            if(Type == PAWN) return "P";
+            if(Type == ROOK) return "R";
+            if(Type == QUEEN) return "Q";
+            if(Type == KNIGHT) return "N";
+            if(Type == KING) return "K";
+            if(Type == BISHOP) return "B";
+        }
+        //lowercase
+        if(Type == PAWN) return "p";
+        if(Type == ROOK) return "r";
+        if(Type == QUEEN) return "q";
+        if(Type == KNIGHT) return "n";
+        if(Type == KING) return "k";
+        if(Type == BISHOP) return "b";
+        return " ";
     }
 
     @Override
