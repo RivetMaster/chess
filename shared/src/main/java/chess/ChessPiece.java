@@ -1,6 +1,9 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
+
+import static chess.ChessPieceMoves.getPieceMoves;
 
 /**
  * Represents a single chess piece
@@ -34,7 +37,6 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-
         return this.Color;
     }
 
@@ -53,7 +55,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        return getPieceMoves(Color, Type, myPosition, board);
     }
 
     @Override
@@ -62,5 +64,19 @@ public class ChessPiece {
                 "Color=" + Color +
                 ", Type=" + Type +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return Color == that.Color && Type == that.Type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Color, Type);
     }
 }
