@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 import static chess.ChessGame.TeamColor.*;
+import static chess.ChessGame.TeamStatus.*;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -15,11 +16,15 @@ public class ChessGame {
 
     ChessBoard board;
     TeamColor turn;
+    TeamStatus White;
+    TeamStatus Black;
 
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
         turn = WHITE;
+        White = PLAYING;
+        Black = PLAYING;
     }
 
     /**
@@ -46,6 +51,14 @@ public class ChessGame {
         BLACK
     }
 
+    public enum TeamStatus {
+        PLAYING,
+        IN_CHECK,
+        IN_CHECKMATE,
+        STALEMATE,
+        WIN,
+        LOSS
+    }
     /**
      * Gets all valid moves for a piece at the given location
      *
