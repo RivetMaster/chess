@@ -26,7 +26,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return turn;
     }
 
     /**
@@ -54,7 +54,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if(board.getPiece(startPosition) == null){
+            return null;
+        }
+        Collection<ChessMove> validmoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+        for(var move : validmoves){
+
+        }
+        return validmoves;
     }
 
     /**
@@ -64,7 +71,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+        board.addPiece(move.getStartPosition(), null);
     }
 
     /**
