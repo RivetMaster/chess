@@ -19,6 +19,10 @@ public class ChessBoard {
     public ChessBoard() {
     }
 
+    public ChessBoard(ChessBoard copy){
+        this.squares = copy.squares;
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
