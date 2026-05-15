@@ -63,20 +63,20 @@ public class ChessPiece {
     @Override
     public String toString() {
         if(Color == WHITE){ // uppercase
-            if(Type == PAWN) return "P";
-            if(Type == ROOK) return "R";
-            if(Type == QUEEN) return "Q";
-            if(Type == KNIGHT) return "N";
-            if(Type == KING) return "K";
-            if(Type == BISHOP) return "B";
+            if(Type == PAWN) return " P  ";
+            if(Type == ROOK) return " R  ";
+            if(Type == QUEEN) return " Q  ";
+            if(Type == KNIGHT) return " N  ";
+            if(Type == KING) return " K  ";
+            if(Type == BISHOP) return " B  ";
         }
         //lowercase
-        if(Type == PAWN) return "p";
-        if(Type == ROOK) return "r";
-        if(Type == QUEEN) return "q";
-        if(Type == KNIGHT) return "n";
-        if(Type == KING) return "k";
-        if(Type == BISHOP) return "b";
+        if(Type == PAWN) return " p  ";
+        if(Type == ROOK) return " r  ";
+        if(Type == QUEEN) return " q  ";
+        if(Type == KNIGHT) return " n  ";
+        if(Type == KING) return " k  ";
+        if(Type == BISHOP) return " b  ";
         return " ";
     }
 
