@@ -45,27 +45,29 @@ public class ChessPieceMoves {
                         possibleMoves.add(new ChessMove(position, temp, null));
                     }
                 }
-                if(col > 1){ // diagonal capture left
-                    temp = new ChessPosition(row + 1, col - 1);
-                    if(board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent){
-                        if(row == black_pwn_row){ //diagonal promotion
-                            for(ChessPiece.PieceType t : promotionTypes){
-                                possibleMoves.add(new ChessMove(position, temp, t));
+                if(row < 8) {
+                    if (col > 1) { // diagonal capture left
+                        temp = new ChessPosition(row + 1, col - 1);
+                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
+                            if (row == black_pwn_row) { //diagonal promotion
+                                for (ChessPiece.PieceType t : promotionTypes) {
+                                    possibleMoves.add(new ChessMove(position, temp, t));
+                                }
+                            } else {
+                                possibleMoves.add(new ChessMove(position, temp, null));
                             }
-                        } else{
-                            possibleMoves.add(new ChessMove(position, temp, null));
                         }
                     }
-                }
-                if(col < sq_depth){ //diagonal capture right
-                    temp = new ChessPosition(row + 1, col + 1);
-                    if(board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent){
-                        if(row == black_pwn_row){ //diagonal promotion
-                            for(ChessPiece.PieceType t : promotionTypes){
-                                possibleMoves.add(new ChessMove(position, temp, t));
+                    if (col < sq_depth) { //diagonal capture right
+                        temp = new ChessPosition(row + 1, col + 1);
+                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
+                            if (row == black_pwn_row) { //diagonal promotion
+                                for (ChessPiece.PieceType t : promotionTypes) {
+                                    possibleMoves.add(new ChessMove(position, temp, t));
+                                }
+                            } else {
+                                possibleMoves.add(new ChessMove(position, temp, null));
                             }
-                        } else{
-                            possibleMoves.add(new ChessMove(position, temp, null));
                         }
                     }
                 }
@@ -89,27 +91,29 @@ public class ChessPieceMoves {
                         possibleMoves.add(new ChessMove(position, temp, null));
                     }
                 }
-                if(col > 1){ // capture diagonal left
-                    temp = new ChessPosition(row - 1, col - 1);
-                    if(board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent){
-                        if(row == white_pwn_row){
-                            for(ChessPiece.PieceType t : promotionTypes){
-                                possibleMoves.add(new ChessMove(position, temp, t));
+                if(row > 1) {
+                    if (col > 1) { // capture diagonal left
+                        temp = new ChessPosition(row - 1, col - 1);
+                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
+                            if (row == white_pwn_row) {
+                                for (ChessPiece.PieceType t : promotionTypes) {
+                                    possibleMoves.add(new ChessMove(position, temp, t));
+                                }
+                            } else {
+                                possibleMoves.add(new ChessMove(position, temp, null));
                             }
-                        } else{
-                            possibleMoves.add(new ChessMove(position, temp, null));
                         }
                     }
-                }
-                if(col < sq_depth){ // capture diagonal right
-                    temp = new ChessPosition(row - 1, col + 1);
-                    if(board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent){
-                        if(row == white_pwn_row){
-                            for(ChessPiece.PieceType t : promotionTypes){
-                                possibleMoves.add(new ChessMove(position, temp, t));
+                    if (col < sq_depth) { // capture diagonal right
+                        temp = new ChessPosition(row - 1, col + 1);
+                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
+                            if (row == white_pwn_row) {
+                                for (ChessPiece.PieceType t : promotionTypes) {
+                                    possibleMoves.add(new ChessMove(position, temp, t));
+                                }
+                            } else {
+                                possibleMoves.add(new ChessMove(position, temp, null));
                             }
-                        } else{
-                            possibleMoves.add(new ChessMove(position, temp, null));
                         }
                     }
                 }
