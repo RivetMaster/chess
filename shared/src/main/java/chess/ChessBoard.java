@@ -20,7 +20,10 @@ public class ChessBoard {
     }
 
     public ChessBoard(ChessBoard copy){
-        this.squares = copy.squares;
+        //makes shallow copy, references to pieces objects, okay because they don't hold position information and making moves makes new pieces
+        for(int i = 0; i < 8; i++) {
+            this.squares[i] = Arrays.copyOf(copy.squares[i], copy.squares[i].length);
+        }
     }
 
     /**

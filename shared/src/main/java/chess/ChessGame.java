@@ -77,7 +77,7 @@ public class ChessGame {
         ChessGame testGame = new ChessGame();
         ChessBoard testBoard = new ChessBoard(board);
         for(var move : board.getPiece(startPosition).pieceMoves(board, startPosition)){
-            testBoard.addPiece(move.getEndPosition(), board.getPiece(startPosition));
+            testBoard.addPiece(move.getEndPosition(), testBoard.getPiece(startPosition));
             testBoard.addPiece(move.getStartPosition(), null);
             testGame.setBoard(testBoard);
             testGame.setTeamTurn(pieceColor);
@@ -99,7 +99,7 @@ public class ChessGame {
         boolean valid = false;
         TeamColor teamColor = null;
         // if there is a piece at the starting position
-        if(move != null && board.getPiece(move.getStartPosition()) != null) {
+        if((move != null) && (board.getPiece(move.getStartPosition()) != null)) {
             // if the piece at the starting position is the same color as whose turn it is
             teamColor = board.getPiece(move.getStartPosition()).getTeamColor();
             if(turn == teamColor) {
@@ -112,11 +112,12 @@ public class ChessGame {
                 }
             }
         }
-        if(valid){
+        if(valid && (board.getPiece(move.getStartPosition()) != null)){
+            ChessPiece temp = new ChessPiece(teamColor, board.getPiece(move.getStartPosition()).getPieceType() );
             if(move.getPromotionPiece() == null){
-                board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+                board.addPiece(move.getEndPosition(), temp);
             } else{
-                ChessPiece temp = new ChessPiece(teamColor, move.getPromotionPiece());
+                temp = new ChessPiece(teamColor, move.getPromotionPiece());
                 board.addPiece(move.getEndPosition(), temp);
             }
             board.addPiece(move.getStartPosition(), null);
@@ -173,6 +174,22 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        for(int r = 1; r <= 8; r++){
+            for(int c = 1; c <= 8; c++){
+                if(board.getPiece(new ChessPosition(r, c)) != null) {
+                    ChessPiece p = board.getPiece(new ChessPosition(r, c));
+                    if (p.getTeamColor() == teamColor && p.getPieceType() == KING) {
+                        if (p.pieceMoves(board, new ChessPosition(r, c)).isEmpty()) {
+                                if(teamColor == WHITE) White = IN_CHECKMATE;
+                                else if(teamColor == BLACK) Black = IN_CHECKMATE;
+                        } else{
+                            isInStalemate(teamColor);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         if(teamColor == WHITE){
             return(White == IN_CHECKMATE);
         }
