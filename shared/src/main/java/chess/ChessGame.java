@@ -77,13 +77,37 @@ public class ChessGame {
         ChessGame testGame = new ChessGame();
         ChessBoard testBoard = new ChessBoard(board);
         for(var move : board.getPiece(startPosition).pieceMoves(board, startPosition)){
+            // in test board make the move
             testBoard.addPiece(move.getEndPosition(), testBoard.getPiece(startPosition));
             testBoard.addPiece(move.getStartPosition(), null);
             testGame.setBoard(testBoard);
             testGame.setTeamTurn(pieceColor);
-            if(!testGame.isInCheck(pieceColor) && !testGame.isInCheckmate(pieceColor)){
-                validMoves.add(move);
+            //check if the king in the testboard is in danger, if not, add move to validMoves.
+            // Do without calling isinCheck or isinCheckmate or setStatus so that not infinite loop
+            TeamColor opponent;
+            boolean add = true;
+            if(pieceColor == WHITE) {
+                opponent = BLACK;
+            } else{
+                opponent = WHITE;
             }
+            //check for king in danger
+            for(int r = 1; r <= 8; r++){
+                for(int c = 1; c <= 8; c++){
+                    if(testBoard.getPiece(new ChessPosition(r, c)) != null) {
+                        ChessPiece p = testBoard.getPiece(new ChessPosition(r, c));
+                        if (p.getTeamColor() == opponent) {
+                            for (var m : p.pieceMoves(testBoard, new ChessPosition(r, c))) {
+                                if ((testBoard.getPiece(m.getEndPosition()) != null) && (testBoard.getPiece(m.getEndPosition()).getPieceType() == KING)) {
+                                    add = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if(add) validMoves.add(move); //add move to validMoves if king was not in danger
             testBoard = new ChessBoard(board);
         }
         return validMoves;
@@ -140,8 +164,8 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         setStatus(teamColor);
-        if(teamColor == WHITE) return(White == IN_CHECK);
-        return ( Black == IN_CHECK);
+        if(teamColor == WHITE) return(White == IN_CHECK || White == IN_CHECKMATE);
+        return ( Black == IN_CHECK || Black == IN_CHECKMATE);
     }
 
     /**
@@ -206,7 +230,6 @@ public class ChessGame {
      * Sets teamColor's team status if applicable to check, checkmate, or stalemate
      *
      * @param teamColor which team to check for check, checkmate, stalemate.
-     * @return void
      */
     public void setStatus(TeamColor teamColor){
         TeamColor opponent;
@@ -218,30 +241,37 @@ public class ChessGame {
             Black = PLAYING;
         }
         boolean kingCantMove = false;
+        boolean teamCanMove = false;
         //check for check
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){
                 if(board.getPiece(new ChessPosition(r, c)) != null) {
                     ChessPiece p = board.getPiece(new ChessPosition(r, c));
                     if (p.getTeamColor() == opponent) {
-                        for (var m : p.pieceMoves(board, new ChessPosition(r, c))) {
+                        for (var m : validMoves(new ChessPosition(r, c))) {
                             if ((board.getPiece(m.getEndPosition()) != null) && (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
                                 if(teamColor == WHITE) White = IN_CHECK;
                                 else if(teamColor == BLACK) Black = IN_CHECK;
                             }
                         }
                     }
+                    if(p.getTeamColor() == teamColor){
+                        //if any piece on team can make a valid move == taking board out of check, then not in checkmate
+                        if(!validMoves(new ChessPosition(r, c)).isEmpty()){
+                            teamCanMove = true;
+                        }
+                    }
                     //check for checkmate
                     if (p.getTeamColor() == teamColor && p.getPieceType() == KING) {
-                        if (p.pieceMoves(board, new ChessPosition(r, c)).isEmpty()) {
+                        if (validMoves(new ChessPosition(r, c)).isEmpty()) {
                             kingCantMove = true;
                         }
                     }
                 }
             }
         }
-        if(teamColor == WHITE && White == IN_CHECK && kingCantMove) White = IN_CHECKMATE;
-        if(teamColor == BLACK && Black == IN_CHECK && kingCantMove) Black = IN_CHECKMATE;
+        if(teamColor == WHITE && White == IN_CHECK && kingCantMove && !teamCanMove) White = IN_CHECKMATE;
+        if(teamColor == BLACK && Black == IN_CHECK && kingCantMove && !teamCanMove) Black = IN_CHECKMATE;
         //check for stalemate
         if(!(getStatus(teamColor)==IN_CHECK) && !(getStatus(teamColor)==IN_CHECKMATE)) {
             //change status to stalemate, change back to playing if found to have moves available
@@ -253,7 +283,7 @@ public class ChessGame {
                     if (board.getPiece(new ChessPosition(r, c)) != null) {
                         if (board.getPiece(new ChessPosition(r, c)).getTeamColor() == teamColor) {
                             //if any of this team pieces can make valid move, not in stalemate
-                            if (!board.getPiece(new ChessPosition(r, c)).pieceMoves(board, new ChessPosition(r, c)).isEmpty()) {
+                            if (!validMoves(new ChessPosition(r, c)).isEmpty()) {
                                 if (teamColor == WHITE) White = PLAYING;
                                 else if (teamColor == BLACK) Black = PLAYING;
                                 break;
@@ -281,9 +311,6 @@ public class ChessGame {
 
     @Override
     public String toString() {
-        return "ChessGame{" +
-                "board=" + board +
-                ", turn=" + turn +
-                '}';
+        return board + ", turn=" + turn;
     }
 }
