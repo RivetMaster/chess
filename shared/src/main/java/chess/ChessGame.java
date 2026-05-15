@@ -236,7 +236,6 @@ public class ChessGame {
                         if (p.pieceMoves(board, new ChessPosition(r, c)).isEmpty()) {
                             kingCantMove = true;
                         }
-                        break;
                     }
                 }
             }
