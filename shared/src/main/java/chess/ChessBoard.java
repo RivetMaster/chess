@@ -21,7 +21,7 @@ public class ChessBoard {
 
     public ChessBoard(ChessBoard copy){
         //makes shallow copy, references to pieces objects, okay because they don't hold position information and making moves makes new pieces
-        for(int i = 0; i < 8; i++) {
+        for(int i = 0; i < squares.length; i++) {
             this.squares[i] = Arrays.copyOf(copy.squares[i], copy.squares[i].length);
         }
     }
@@ -98,14 +98,15 @@ public class ChessBoard {
     @Override
     public String toString() {
         return String.format(
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|\n" +
-                        "|%s|%s|%s|%s|%s|%s|%s|%s|",
+                """
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|
+                        |%s|%s|%s|%s|%s|%s|%s|%s|""",
         squares[7][0], squares[7][1], squares[7][2], squares[7][3], squares[7][4], squares[7][5], squares[7][6], squares[7][7],
         squares[6][0], squares[6][1], squares[6][2], squares[6][3], squares[6][4], squares[6][5], squares[6][6], squares[6][7],
         squares[5][0], squares[5][1], squares[5][2], squares[5][3], squares[5][4], squares[5][5], squares[5][6], squares[5][7],
