@@ -11,12 +11,12 @@ import java.util.Objects;
  */
 public class ChessPosition {
 
-    int Row;
-    int Col;
+    private final int row; //row on the chess board
+    private final int col; //column on the chess board
 
     public ChessPosition(int row, int col) {
-        Row = row;
-        Col = col;
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -24,7 +24,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return this.Row;
+        return row;
     }
 
     /**
@@ -32,12 +32,12 @@ public class ChessPosition {
      * 1 codes for the left column
      */
     public int getColumn() {
-        return this.Col;
+        return col;
     }
 
     @Override
     public String toString() {
-        return "[" + Row + ", " + Col +"]";
+        return "[" + row + ", " + col +"]";
     }
 
     @Override
@@ -46,11 +46,11 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return getRow() == that.getRow() && Col == that.Col;
+        return getRow() == that.getRow() && getColumn() == that.getColumn();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRow(), Col);
+        return Objects.hash(getRow(), getColumn());
     }
 }

@@ -14,7 +14,7 @@ import static chess.ChessPiece.PieceType.*;
  */
 public class ChessBoard {
 
-    ChessPiece[][] squares = new ChessPiece[8][8];
+    private ChessPiece[][] squares = new ChessPiece[8][8]; //array of arrays of chess piece objects, representing the chess board squares
 
     public ChessBoard() {
     }

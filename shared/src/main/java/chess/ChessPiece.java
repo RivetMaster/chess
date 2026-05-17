@@ -15,12 +15,12 @@ import static chess.ChessPieceMoves.getPieceMoves;
  */
 public class ChessPiece {
 
-    ChessGame.TeamColor Color;
-    ChessPiece.PieceType Type;
+    private final ChessGame.TeamColor color; //team color of the piece
+    private final ChessPiece.PieceType type; //type of chess piece
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        Color = pieceColor;
-        Type = type;
+        color = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -39,14 +39,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return this.Color;
+        return this.color;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return this.Type;
+        return this.type;
     }
 
     /**
@@ -57,26 +57,26 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return getPieceMoves(Color, Type, myPosition, board);
+        return getPieceMoves(color, type, myPosition, board);
     }
 
     @Override
     public String toString() {
-        if(Color == WHITE){ // uppercase
-            if(Type == PAWN) return " P  ";
-            if(Type == ROOK) return " R  ";
-            if(Type == QUEEN) return " Q  ";
-            if(Type == KNIGHT) return " N  ";
-            if(Type == KING) return " K  ";
-            if(Type == BISHOP) return " B  ";
+        if(color == WHITE){ // uppercase
+            if(type == PAWN) return " P  ";
+            if(type == ROOK) return " R  ";
+            if(type == QUEEN) return " Q  ";
+            if(type == KNIGHT) return " N  ";
+            if(type == KING) return " K  ";
+            if(type == BISHOP) return " B  ";
         }
         //lowercase
-        if(Type == PAWN) return " p  ";
-        if(Type == ROOK) return " r  ";
-        if(Type == QUEEN) return " q  ";
-        if(Type == KNIGHT) return " n  ";
-        if(Type == KING) return " k  ";
-        if(Type == BISHOP) return " b  ";
+        if(type == PAWN) return " p  ";
+        if(type == ROOK) return " r  ";
+        if(type == QUEEN) return " q  ";
+        if(type == KNIGHT) return " n  ";
+        if(type == KING) return " k  ";
+        if(type == BISHOP) return " b  ";
         return " ";
     }
 
@@ -86,11 +86,11 @@ public class ChessPiece {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return Color == that.Color && Type == that.Type;
+        return getTeamColor() == that.getTeamColor() && getPieceType() == that.getPieceType();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(Color, Type);
+        return Objects.hash(getTeamColor(), getPieceType());
     }
 }
