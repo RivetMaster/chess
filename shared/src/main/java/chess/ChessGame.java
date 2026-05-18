@@ -95,6 +95,7 @@ public class ChessGame {
                 opponent = WHITE;
             }
             //check for king in danger
+            //check every square on board, for every opponent piece check if they can capture king
             for(int r = 1; r <= 8; r++){
                 for(int c = 1; c <= 8; c++){
                     if(testBoard.getPiece(new ChessPosition(r, c)) != null) {
@@ -102,7 +103,7 @@ public class ChessGame {
                         if (p.getTeamColor() == opponent) {
                             for (var m : p.pieceMoves(testBoard, new ChessPosition(r, c))) {
                                 if ((testBoard.getPiece(m.getEndPosition()) != null) && (testBoard.getPiece(m.getEndPosition()).getPieceType() == KING)) {
-                                    add = false;
+                                    add = false; //if the king is in danger, the move made was not valid
                                     break;
                                 }
                             }
@@ -111,7 +112,7 @@ public class ChessGame {
                 }
             }
             if(add) validMoves.add(move); //add move to validMoves if king was not in danger
-            testBoard = new ChessBoard(board);
+            testBoard = new ChessBoard(board); //reset testBoard
         }
         return validMoves;
     }
@@ -123,8 +124,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        boolean valid = false;
-        TeamColor teamColor = null;
+        boolean valid = false; //bool to hold if the move being asked to make is valid
+        TeamColor teamColor = null; //hold team color of piece to move
         // if there is a piece at the starting position
         if((move != null) && (board.getPiece(move.getStartPosition()) != null)) {
             // if the piece at the starting position is the same color as whose turn it is
@@ -133,22 +134,23 @@ public class ChessGame {
                 // for all the valid moves that can be made by that piece at the starting position
                 for (var m : validMoves(move.getStartPosition())) {
                     if (m.equals(move)) {
-                        valid = true;
+                        valid = true; //if the move is a valid move, valid becomes true
                         break;
                     }
                 }
             }
         }
+        //if the move is valid and there is a piece at the starting position of the move, make the move
         if(valid && (board.getPiece(move.getStartPosition()) != null)){
             ChessPiece temp = new ChessPiece(teamColor, board.getPiece(move.getStartPosition()).getPieceType() );
             if(move.getPromotionPiece() == null){
-                board.addPiece(move.getEndPosition(), temp);
+                board.addPiece(move.getEndPosition(), temp); //if there is no promotion, new piece has same piece type
             } else{
-                temp = new ChessPiece(teamColor, move.getPromotionPiece());
+                temp = new ChessPiece(teamColor, move.getPromotionPiece()); //if promotion, new piece has new type
                 board.addPiece(move.getEndPosition(), temp);
             }
-            board.addPiece(move.getStartPosition(), null);
-
+            board.addPiece(move.getStartPosition(), null); //remove starting piece from board
+            //change team turn
             if(teamColor == WHITE){
                 turn = BLACK;
             } else{
@@ -168,7 +170,7 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         setStatus(teamColor);
         if(teamColor == WHITE) return(whiteStatus == IN_CHECK || whiteStatus == IN_CHECKMATE);
-        return ( blackStatus == IN_CHECK || blackStatus == IN_CHECKMATE);
+        return (blackStatus == IN_CHECK || blackStatus == IN_CHECKMATE);
     }
 
     /**
@@ -179,10 +181,8 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         setStatus(teamColor);
-        if(teamColor == WHITE){
-            return(whiteStatus == IN_CHECKMATE);
-        }
-        return ( blackStatus == IN_CHECKMATE);
+        if(teamColor == WHITE) return(whiteStatus == IN_CHECKMATE);
+        return (blackStatus == IN_CHECKMATE);
     }
 
     /**
@@ -194,9 +194,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         setStatus(teamColor);
-        if(teamColor == WHITE){
-            return(whiteStatus == STALEMATE);
-        }
+        if(teamColor == WHITE) return(whiteStatus == STALEMATE);
         return ( blackStatus == STALEMATE);
     }
 
@@ -235,7 +233,8 @@ public class ChessGame {
      * @param teamColor which team to check for check, checkmate, stalemate.
      */
     public void setStatus(TeamColor teamColor){
-        TeamColor opponent;
+        TeamColor opponent; //hold opponent team color
+        //reset status to default so if no change is made status is accurate
         if(teamColor == WHITE) {
             opponent = BLACK;
             whiteStatus = PLAYING;
@@ -243,8 +242,8 @@ public class ChessGame {
             opponent = WHITE;
             blackStatus = PLAYING;
         }
-        boolean kingCantMove = false;
-        boolean teamCanMove = false;
+        boolean kingCantMove = false; //boolean: true if king cannot make any valid moves
+        boolean teamCanMove = false; //boolean: true if the team DOES has valid moves it can make
         //check for check
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){
@@ -253,18 +252,19 @@ public class ChessGame {
                     if (p.getTeamColor() == opponent) {
                         for (var m : validMoves(new ChessPosition(r, c))) {
                             if ((board.getPiece(m.getEndPosition()) != null) && (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
+                                //king is in danger, set status to check
                                 if(teamColor == WHITE) whiteStatus = IN_CHECK;
                                 else if(teamColor == BLACK) blackStatus = IN_CHECK;
                             }
                         }
                     }
                     if(p.getTeamColor() == teamColor){
-                        //if any piece on team can make a valid move == taking board out of check, then not in checkmate
+                        //if any piece on team can make a valid move == can take board out of check, then not in checkmate
                         if(!validMoves(new ChessPosition(r, c)).isEmpty()){
                             teamCanMove = true;
                         }
                     }
-                    //check for checkmate
+                    //check if king can make any valid moves
                     if (p.getTeamColor() == teamColor && p.getPieceType() == KING) {
                         if (validMoves(new ChessPosition(r, c)).isEmpty()) {
                             kingCantMove = true;
@@ -273,9 +273,12 @@ public class ChessGame {
                 }
             }
         }
-        if(teamColor == WHITE && whiteStatus == IN_CHECK && kingCantMove && !teamCanMove) whiteStatus = IN_CHECKMATE;
-        if(teamColor == BLACK && blackStatus == IN_CHECK && kingCantMove && !teamCanMove) blackStatus = IN_CHECKMATE;
-        //check for stalemate
+        //check for checkmate
+        if(getStatus(teamColor) == IN_CHECK && kingCantMove && !teamCanMove) {
+            if(teamColor == WHITE) whiteStatus = IN_CHECKMATE;
+            if(teamColor == BLACK) blackStatus = IN_CHECKMATE;
+        }
+        //check for stalemate = not in check or checkmate but no valid moves can be made
         if(!(getStatus(teamColor)==IN_CHECK) && !(getStatus(teamColor)==IN_CHECKMATE)) {
             //change status to stalemate, change back to playing if found to have moves available
             if (teamColor == WHITE) whiteStatus = STALEMATE;
@@ -304,16 +307,16 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(getBoard(), chessGame.getBoard()) && turn == chessGame.turn;
+        return Objects.equals(getBoard(), chessGame.getBoard()) && getTeamTurn() == chessGame.getTeamTurn();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBoard(), turn);
+        return Objects.hash(getBoard(), getTeamTurn());
     }
 
     @Override
     public String toString() {
-        return board + ", turn=" + turn;
+        return getBoard() + ", turn=" + getTeamTurn();
     }
 }
