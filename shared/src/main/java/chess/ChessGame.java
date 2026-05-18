@@ -101,9 +101,7 @@ public class ChessGame {
             while(r <= 8){
                 ChessPiece p = testBoard.getPiece(new ChessPosition(r, c));
                 if(p != null && p.getTeamColor() == opponent) {
-                    for (var m : p.pieceMoves(testBoard, new ChessPosition(r, c))) {
-                        add = kingInDanger(testBoard, m, add);
-                    }
+                    add = kingInDanger(testBoard, add, p.pieceMoves(testBoard, new ChessPosition(r, c)));
                 }
                 c++;
                 if(c > 8){
@@ -123,14 +121,15 @@ public class ChessGame {
      * returns false if king is currently in danger, otherwise returns add
      *
      * @param board  current chess board
-     * @param m   move testing to see if should add
      * @param add boolean value that kingInDanger is meant to update, whether to add move
      * @return new or same add value, to add or not to add move to valid moves
      */
-    private boolean kingInDanger(ChessBoard board, ChessMove m, boolean add){
-        if ((board.getPiece(m.getEndPosition()) != null) &&
-                (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
-            return false; //if the king is in danger, the move made was not valid
+    private boolean kingInDanger(ChessBoard board, boolean add, Collection<ChessMove> moves){
+        for(var m : moves){
+            if ((board.getPiece(m.getEndPosition()) != null) &&
+                    (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
+                return false; //if the king is in danger, the move made was not valid
+            }
         }
         return add;
     }
@@ -277,12 +276,8 @@ public class ChessGame {
             if(board.getPiece(new ChessPosition(r, c)) != null) {
                 ChessPiece p = board.getPiece(new ChessPosition(r, c));
                 if (p.getTeamColor() == opponent) {
-                    for (var m : validMoves(new ChessPosition(r, c))) {
-                        if ((board.getPiece(m.getEndPosition()) != null) &&
-                                (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
-                            //king is in danger, set status to check
-                            setStatus(teamColor, IN_CHECK);
-                        }
+                    if(!kingInDanger(board, true, validMoves(new ChessPosition(r, c)))){
+                        setStatus(teamColor, IN_CHECK); //king in danger, set status to check
                     }
                 }
                 if(p.getTeamColor() == teamColor && !validMoves(new ChessPosition(r, c)).isEmpty()){
