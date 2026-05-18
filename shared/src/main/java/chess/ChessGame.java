@@ -242,8 +242,8 @@ public class ChessGame {
             opponent = WHITE;
             blackStatus = PLAYING;
         }
-        boolean kingCantMove = false; //boolean: true if king cannot make any valid moves
-        boolean teamCanMove = false; //boolean: true if the team DOES has valid moves it can make
+        boolean kingCantMove = false; //true if king cannot make any valid moves
+        boolean teamCanMove = false; //true if the team DOES has valid moves it can make
         //check for check
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){

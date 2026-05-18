@@ -10,117 +10,82 @@ import static chess.ChessPiece.PieceType.*;
 public class ChessPieceMoves {
     static ChessPiece.PieceType[] promotionTypes = {QUEEN, BISHOP, KNIGHT, ROOK};
 
-    public ChessPieceMoves(/*ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, ChessPosition position */){}
+    public ChessPieceMoves(){}
 
     static public Collection<ChessMove> getPieceMoves(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, ChessPosition position, ChessBoard board){
-        Collection<ChessMove> possibleMoves = new ArrayList<>();
+        Collection<ChessMove> possibleMoves = new ArrayList<>(); //arraylist of possible moves for the piece
         int row = position.getRow();
         int col = position.getColumn();
-        int sq_depth = 8;
-        int black_pwn_row = 7;
-        int white_pwn_row = 2;
+        int boardLength = 8; //side length of chessboard
+        int pawnRowBlk = 7; //row number where black pawns start
+        int pawnRowWht = 2; //row number where white pawns start
+
+        int pawnForward = -1; //value that is moving forward for a black pawn
+        int promotionRow = pawnRowWht; //the row that black pawn can promote from
+        int startingRow = pawnRowBlk; //starting row for black pawn
+        int moveRow;
         ChessPosition temp;
+
         ChessGame.TeamColor opponent = WHITE;
         if(pieceColor == WHITE) {
+            pawnForward = 1;
+            startingRow = pawnRowWht;
+            promotionRow = pawnRowBlk;
             opponent = BLACK;
         }
+
         if(type==PAWN){
-            if(pieceColor == WHITE){
-                if(row < black_pwn_row) { //move no promotion
-                    temp = new ChessPosition(row + 1, col);
-                    if (board.getPiece(temp) == null) {
-                        possibleMoves.add(new ChessMove(position, temp, null));
-                    }
-                } else if (row == black_pwn_row){ // move with promotion options
-                    temp = new ChessPosition(row + 1, col);
-                    if (board.getPiece(temp) == null) {
-                        for(ChessPiece.PieceType t : promotionTypes){
-                            possibleMoves.add(new ChessMove(position, temp, t));
-                        }
+            moveRow = row + pawnForward;
+            //move no promotion
+            if(moveRow > 0 && moveRow < boardLength && row != promotionRow) {
+                temp = new ChessPosition(moveRow, col);
+                if (board.getPiece(temp) == null) {
+                    possibleMoves.add(new ChessMove(position, temp, null));
+                }
+            } //move with promotion options
+            else if (row == promotionRow){
+                temp = new ChessPosition(moveRow, col);
+                if (board.getPiece(temp) == null) {
+                    for(ChessPiece.PieceType t : promotionTypes){
+                        possibleMoves.add(new ChessMove(position, temp, t));
                     }
                 }
-                if(row == white_pwn_row) { //move 2 forward
-                    temp = new ChessPosition(row + 2, col);
-                    if (board.getPiece(temp) == null && board.getPiece(new ChessPosition(row + 1, col)) == null) {
-                        possibleMoves.add(new ChessMove(position, temp, null));
-                    }
+            }
+            //move 2
+            if(row == startingRow) {
+                temp = new ChessPosition(moveRow + pawnForward, col);
+                if (board.getPiece(temp) == null && board.getPiece(new ChessPosition(moveRow, col)) == null) {
+                    possibleMoves.add(new ChessMove(position, temp, null));
                 }
-                if(row < 8) {
-                    if (col > 1) { // diagonal capture left
-                        temp = new ChessPosition(row + 1, col - 1);
-                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
-                            if (row == black_pwn_row) { //diagonal promotion
-                                for (ChessPiece.PieceType t : promotionTypes) {
-                                    possibleMoves.add(new ChessMove(position, temp, t));
-                                }
-                            } else {
-                                possibleMoves.add(new ChessMove(position, temp, null));
-                            }
-                        }
-                    }
-                    if (col < sq_depth) { //diagonal capture right
-                        temp = new ChessPosition(row + 1, col + 1);
-                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
-                            if (row == black_pwn_row) { //diagonal promotion
-                                for (ChessPiece.PieceType t : promotionTypes) {
-                                    possibleMoves.add(new ChessMove(position, temp, t));
-                                }
-                            } else {
-                                possibleMoves.add(new ChessMove(position, temp, null));
-                            }
-                        }
-                    }
-                }
-            } else if(pieceColor == BLACK){
-                if(row > white_pwn_row){ //move forward
-                    temp = new ChessPosition(row-1, col);
-                    if (board.getPiece(temp) == null) {
-                        possibleMoves.add(new ChessMove(position, temp, null));
-                    }
-                } else if (row == white_pwn_row){ // move forward promotion
-                    temp = new ChessPosition(row-1, col);
-                    if (board.getPiece(temp) == null) {
+            }
+            //diagonal capture
+            if (row < boardLength && row > 1 && col > 1) { // diagonal capture left
+                temp = new ChessPosition(moveRow, col - 1);
+                if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
+                    if (row == promotionRow) { //diagonal promotion
                         for (ChessPiece.PieceType t : promotionTypes) {
                             possibleMoves.add(new ChessMove(position, temp, t));
                         }
-                    }
-                }
-                if(row == black_pwn_row) { // move forward 2
-                    temp = new ChessPosition(row - 2, col);
-                    if (board.getPiece(temp) == null && board.getPiece(new ChessPosition(row-1, col)) == null) {
+                    } else {
                         possibleMoves.add(new ChessMove(position, temp, null));
                     }
                 }
-                if(row > 1) {
-                    if (col > 1) { // capture diagonal left
-                        temp = new ChessPosition(row - 1, col - 1);
-                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
-                            if (row == white_pwn_row) {
-                                for (ChessPiece.PieceType t : promotionTypes) {
-                                    possibleMoves.add(new ChessMove(position, temp, t));
-                                }
-                            } else {
-                                possibleMoves.add(new ChessMove(position, temp, null));
-                            }
+            }
+            if (row < boardLength && row > 1 && col < boardLength) { //diagonal capture right
+                temp = new ChessPosition(moveRow, col + 1);
+                if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
+                    if (row == promotionRow) { //diagonal promotion
+                        for (ChessPiece.PieceType t : promotionTypes) {
+                            possibleMoves.add(new ChessMove(position, temp, t));
                         }
-                    }
-                    if (col < sq_depth) { // capture diagonal right
-                        temp = new ChessPosition(row - 1, col + 1);
-                        if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
-                            if (row == white_pwn_row) {
-                                for (ChessPiece.PieceType t : promotionTypes) {
-                                    possibleMoves.add(new ChessMove(position, temp, t));
-                                }
-                            } else {
-                                possibleMoves.add(new ChessMove(position, temp, null));
-                            }
-                        }
+                    } else {
+                        possibleMoves.add(new ChessMove(position, temp, null));
                     }
                 }
             }
         }
         if(type == ROOK || type == QUEEN){
-            for(int r = row + 1; r <= sq_depth; r++){ //check every square vertically up from position
+            for(int r = row + 1; r <= boardLength; r++){ //check every square vertically up from position
                 temp = new ChessPosition(r, col);
                 if(board.getPiece(temp) == null){ //add if square empty
                     possibleMoves.add(new ChessMove(position, temp, null));
@@ -142,7 +107,7 @@ public class ChessPieceMoves {
                     break;
                 }
             }
-            for(int c = col + 1; c <= sq_depth; c++){ //check every square horizontally right from position
+            for(int c = col + 1; c <= boardLength; c++){ //check every square horizontally right from position
                 temp = new ChessPosition(row, c);
                 if(board.getPiece(temp) == null){ //add if square empty
                     possibleMoves.add(new ChessMove(position, temp, null));
@@ -166,7 +131,7 @@ public class ChessPieceMoves {
             }
         }
         if(type == KNIGHT){
-            if (row < black_pwn_row){ // check forward jumps
+            if (row < pawnRowBlk){ // check forward jumps
                 if(col < 7) { //forward 2, right 1
                     temp = new ChessPosition(row + 2, col + 1);
                     if(board.getPiece(temp) == null){
@@ -241,7 +206,7 @@ public class ChessPieceMoves {
         }
         if(type == BISHOP || type == QUEEN){
             for(int l = 1; l < col; l++){ // diagonal up left
-                if(row + l <= sq_depth){
+                if(row + l <= boardLength){
                     temp = new ChessPosition(row + l, col - l);
                     if(board.getPiece(temp) == null){
                         possibleMoves.add(new ChessMove(position, temp, null));
@@ -267,8 +232,8 @@ public class ChessPieceMoves {
                 }
             }
             //diagonal to right and up
-            for(int l = 1; l <= sq_depth - col; l++){ // diagonal up right
-                if(row + l <= sq_depth){
+            for(int l = 1; l <= boardLength - col; l++){ // diagonal up right
+                if(row + l <= boardLength){
                     temp = new ChessPosition(row + l, col + l);
                     if(board.getPiece(temp) == null){
                         possibleMoves.add(new ChessMove(position, temp, null));
@@ -295,7 +260,7 @@ public class ChessPieceMoves {
             }
         }
         if(type == KING){
-            if(row < sq_depth){ // move forward
+            if(row < boardLength){ // move forward
                 temp = new ChessPosition(row + 1, col);
                 if(board.getPiece(temp) == null){
                     possibleMoves.add(new ChessMove(position, temp, null));
