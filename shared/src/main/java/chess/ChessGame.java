@@ -102,7 +102,8 @@ public class ChessGame {
                         ChessPiece p = testBoard.getPiece(new ChessPosition(r, c));
                         if (p.getTeamColor() == opponent) {
                             for (var m : p.pieceMoves(testBoard, new ChessPosition(r, c))) {
-                                if ((testBoard.getPiece(m.getEndPosition()) != null) && (testBoard.getPiece(m.getEndPosition()).getPieceType() == KING)) {
+                                if ((testBoard.getPiece(m.getEndPosition()) != null) &&
+                                        (testBoard.getPiece(m.getEndPosition()).getPieceType() == KING)) {
                                     add = false; //if the king is in danger, the move made was not valid
                                     break;
                                 }
@@ -111,7 +112,9 @@ public class ChessGame {
                     }
                 }
             }
-            if(add) validMoves.add(move); //add move to validMoves if king was not in danger
+            if(add) {
+                validMoves.add(move); //add move to validMoves if king was not in danger
+            }
             testBoard = new ChessBoard(board); //reset testBoard
         }
         return validMoves;
@@ -169,7 +172,9 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         setStatus(teamColor);
-        if(teamColor == WHITE) return(whiteStatus == IN_CHECK || whiteStatus == IN_CHECKMATE);
+        if(teamColor == WHITE) {
+            return(whiteStatus == IN_CHECK || whiteStatus == IN_CHECKMATE);
+        }
         return (blackStatus == IN_CHECK || blackStatus == IN_CHECKMATE);
     }
 
@@ -181,7 +186,9 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         setStatus(teamColor);
-        if(teamColor == WHITE) return(whiteStatus == IN_CHECKMATE);
+        if(teamColor == WHITE) {
+            return(whiteStatus == IN_CHECKMATE);
+        }
         return (blackStatus == IN_CHECKMATE);
     }
 
@@ -194,7 +201,9 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         setStatus(teamColor);
-        if(teamColor == WHITE) return(whiteStatus == STALEMATE);
+        if(teamColor == WHITE) {
+            return(whiteStatus == STALEMATE);
+        }
         return ( blackStatus == STALEMATE);
     }
 
@@ -223,7 +232,9 @@ public class ChessGame {
      * @return TeamStatus
      */
     public TeamStatus getStatus(TeamColor teamColor){
-        if(teamColor == WHITE) return whiteStatus;
+        if(teamColor == WHITE) {
+            return whiteStatus;
+        }
         return blackStatus;
     }
 
@@ -251,10 +262,15 @@ public class ChessGame {
                     ChessPiece p = board.getPiece(new ChessPosition(r, c));
                     if (p.getTeamColor() == opponent) {
                         for (var m : validMoves(new ChessPosition(r, c))) {
-                            if ((board.getPiece(m.getEndPosition()) != null) && (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
+                            if ((board.getPiece(m.getEndPosition()) != null) &&
+                                    (board.getPiece(m.getEndPosition()).getPieceType() == KING)) {
                                 //king is in danger, set status to check
-                                if(teamColor == WHITE) whiteStatus = IN_CHECK;
-                                else if(teamColor == BLACK) blackStatus = IN_CHECK;
+                                if(teamColor == WHITE) {
+                                    whiteStatus = IN_CHECK;
+                                }
+                                else if(teamColor == BLACK) {
+                                    blackStatus = IN_CHECK;
+                                }
                             }
                         }
                     }
@@ -275,14 +291,22 @@ public class ChessGame {
         }
         //check for checkmate
         if(getStatus(teamColor) == IN_CHECK && kingCantMove && !teamCanMove) {
-            if(teamColor == WHITE) whiteStatus = IN_CHECKMATE;
-            if(teamColor == BLACK) blackStatus = IN_CHECKMATE;
+            if(teamColor == WHITE) {
+                whiteStatus = IN_CHECKMATE;
+            }
+            if(teamColor == BLACK) {
+                blackStatus = IN_CHECKMATE;
+            }
         }
         //check for stalemate = not in check or checkmate but no valid moves can be made
         if(!(getStatus(teamColor)==IN_CHECK) && !(getStatus(teamColor)==IN_CHECKMATE)) {
             //change status to stalemate, change back to playing if found to have moves available
-            if (teamColor == WHITE) whiteStatus = STALEMATE;
-            else if (teamColor == BLACK) blackStatus = STALEMATE;
+            if (teamColor == WHITE) {
+                whiteStatus = STALEMATE;
+            }
+            else if (teamColor == BLACK) {
+                blackStatus = STALEMATE;
+            }
             //check every piece on this team
             for (int r = 1; r <= 8; r++) {
                 for (int c = 1; c <= 8; c++) {
@@ -290,8 +314,12 @@ public class ChessGame {
                         if (board.getPiece(new ChessPosition(r, c)).getTeamColor() == teamColor) {
                             //if any of this team pieces can make valid move, not in stalemate
                             if (!validMoves(new ChessPosition(r, c)).isEmpty()) {
-                                if (teamColor == WHITE) whiteStatus = PLAYING;
-                                else if (teamColor == BLACK) blackStatus = PLAYING;
+                                if (teamColor == WHITE) {
+                                    whiteStatus = PLAYING;
+                                }
+                                else if (teamColor == BLACK) {
+                                    blackStatus = PLAYING;
+                                }
                                 break;
                             }
                         }

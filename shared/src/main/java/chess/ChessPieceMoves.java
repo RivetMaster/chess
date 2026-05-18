@@ -12,7 +12,10 @@ public class ChessPieceMoves {
 
     public ChessPieceMoves(){}
 
-    static public Collection<ChessMove> getPieceMoves(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, ChessPosition position, ChessBoard board){
+    static public Collection<ChessMove> getPieceMoves(ChessGame.TeamColor pieceColor,
+                                                      ChessPiece.PieceType type,
+                                                      ChessPosition position,
+                                                      ChessBoard board){
         Collection<ChessMove> possibleMoves = new ArrayList<>(); //arraylist of possible moves for the piece
         int row = position.getRow();
         int col = position.getColumn();

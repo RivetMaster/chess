@@ -62,21 +62,46 @@ public class ChessPiece {
 
     @Override
     public String toString() {
+        //maybe find data construct like dictionary, make and just return co-value, use makeUpper or something like that if white
         if(color == WHITE){ // uppercase
-            if(type == PAWN) return " P  ";
-            if(type == ROOK) return " R  ";
-            if(type == QUEEN) return " Q  ";
-            if(type == KNIGHT) return " N  ";
-            if(type == KING) return " K  ";
-            if(type == BISHOP) return " B  ";
+            if(type == PAWN) {
+                return " P  ";
+            }
+            if(type == ROOK) {
+                return " R  ";
+            }
+            if(type == QUEEN) {
+                return " Q  ";
+            }
+            if(type == KNIGHT) {
+                return " N  ";
+            }
+            if(type == KING) {
+                return " K  ";
+            }
+            if(type == BISHOP) {
+                return " B  ";
+            }
         }
         //lowercase
-        if(type == PAWN) return " p  ";
-        if(type == ROOK) return " r  ";
-        if(type == QUEEN) return " q  ";
-        if(type == KNIGHT) return " n  ";
-        if(type == KING) return " k  ";
-        if(type == BISHOP) return " b  ";
+        if(type == PAWN) {
+            return " p  ";
+        }
+        if(type == ROOK) {
+            return " r  ";
+        }
+        if(type == QUEEN) {
+            return " q  ";
+        }
+        if(type == KNIGHT) {
+            return " n  ";
+        }
+        if(type == KING) {
+            return " k  ";
+        }
+        if(type == BISHOP) {
+            return " b  ";
+        }
         return " ";
     }
 
