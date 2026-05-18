@@ -18,20 +18,16 @@ public class ChessPieceMoves {
         int row = position.getRow();
         int col = position.getColumn();
         int boardLength = 8; //side length of chessboard
-        int pawnRowBlk = 7; //row number where black pawns start
-        int pawnRowWht = 2; //row number where white pawns start
-
         int pawnForward = -1; //value that is moving forward for a black pawn
-        int promotionRow = pawnRowWht; //the row that black pawn can promote from
-        int startingRow = pawnRowBlk; //starting row for black pawn
-        int moveRow;
+        int promotionRow = 2; //the row that black pawn can promote from
+        int startingRow = 7; //starting row for black pawn
+        int moveRow; //row moving to
         ChessPosition temp;
-
         ChessGame.TeamColor opponent = WHITE;
         if(pieceColor == WHITE) {
             pawnForward = 1;
-            startingRow = pawnRowWht;
-            promotionRow = pawnRowBlk;
+            startingRow = 2; //starting row for white pawn
+            promotionRow = 7; //promotion row for white pawn
             opponent = BLACK;
         }
 
@@ -51,16 +47,14 @@ public class ChessPieceMoves {
                         possibleMoves.add(new ChessMove(position, temp, t));
                     }
                 }
-            }
-            //move 2
+            } // move 2
             if(row == startingRow) {
                 temp = new ChessPosition(moveRow + pawnForward, col);
                 if (board.getPiece(temp) == null && board.getPiece(new ChessPosition(moveRow, col)) == null) {
                     possibleMoves.add(new ChessMove(position, temp, null));
                 }
-            }
-            //diagonal capture
-            if (row < boardLength && row > 1 && col > 1) { // diagonal capture left
+            } //diagonal capture left
+            if (row < boardLength && row > 1 && col > 1) {
                 temp = new ChessPosition(moveRow, col - 1);
                 if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
                     if (row == promotionRow) { //diagonal promotion
@@ -71,8 +65,8 @@ public class ChessPieceMoves {
                         possibleMoves.add(new ChessMove(position, temp, null));
                     }
                 }
-            }
-            if (row < boardLength && row > 1 && col < boardLength) { //diagonal capture right
+            } //diagonal capture right
+            if (row < boardLength && row > 1 && col < boardLength) {
                 temp = new ChessPosition(moveRow, col + 1);
                 if (board.getPiece(temp) != null && (board.getPiece(temp)).getTeamColor() == opponent) {
                     if (row == promotionRow) { //diagonal promotion
