@@ -148,13 +148,8 @@ public class ChessGame {
             // if the piece at the starting position is the same color as whose turn it is
             teamColor = board.getPiece(move.getStartPosition()).getTeamColor();
             if(turn == teamColor) {
-                // for all the valid moves that can be made by that piece at the starting position
-                for (var m : validMoves(move.getStartPosition())) {
-                    if (m.equals(move)) {
-                        valid = true; //if the move is a valid move, valid becomes true
-                        break;
-                    }
-                }
+                // if move is a valid move, valid becomes true
+                valid = validMoves(move.getStartPosition()).contains(move);
             }
         }
         //if the move is valid and there is a piece at the starting position of the move, make the move

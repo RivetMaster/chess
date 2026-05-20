@@ -64,7 +64,7 @@ public class ChessPieceMoves {
                 possibleMoves.add(new ChessMove(position, temp, null));
             }
             return false;
-        } else if ((board.getPiece(temp)).getTeamColor() == opp && capture){
+        } else if (capture && (board.getPiece(temp)).getTeamColor() == opp){
             if(promotion){
                 for (ChessPiece.PieceType t : promotionTypes) {
                     possibleMoves.add(new ChessMove(position, temp, t));
