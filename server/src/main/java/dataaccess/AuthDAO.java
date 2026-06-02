@@ -14,7 +14,7 @@ public interface AuthDAO{
     //delete all authorizations
     void clearAuth() throws DataAccessException;
     //generate new authorization token
-    private static String generateAuthToken(){
+    static String generateAuthToken(){
         return UUID.randomUUID().toString();
     }
 }
