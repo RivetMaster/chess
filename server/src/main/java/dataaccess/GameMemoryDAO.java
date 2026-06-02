@@ -14,7 +14,7 @@ public class GameMemoryDAO implements GameDAO{
     }
 
     //Create a new game.
-    public void createGame(GameData game) throws DataAccessException{
+    public void createGame(GameData game) {
         games.add(game);
     }
 
@@ -25,7 +25,7 @@ public class GameMemoryDAO implements GameDAO{
     }
 
     //Retrieve all games.
-    public List<GameData> listGames() throws DataAccessException{
+    public List<GameData> listGames() {
         return games;
     }
 
