@@ -18,5 +18,5 @@ public interface GameDAO {
     //Add player to a game (gameID) as the team (color)
     void addPlayer(int gameID, ChessGame.TeamColor color, String username) throws DataAccessException;
     //clear all games
-    void clearGames();
+    void clearGames() throws DataAccessException;
 }
