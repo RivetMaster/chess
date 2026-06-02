@@ -1,18 +1,19 @@
 package dataaccess;
 
 import model.AuthData;
+
 import java.util.UUID;
 
 public interface AuthDAO{
-//createAuth: Create a new authorization.
-    AuthData createAuth(String username);
-//getAuth: Retrieve an authorization given an authToken.
-    AuthData getAuth(String authToken);
-//deleteAuth: Delete an authorization so that it is no longer valid.
-    void deleteAuth(AuthData auth);
-
-    void clearAuth();
-
+    //Create a new authorization.
+    AuthData createAuth(String username) throws DataAccessException;
+    //Retrieve an authorization given an authToken.
+    AuthData getAuth(String authToken) throws DataAccessException;
+    //Delete an authorization so that it is no longer valid.
+    void deleteAuth(AuthData auth) throws DataAccessException;
+    //delete all authorizations
+    void clearAuth() throws DataAccessException;
+    //generate new authorization token
     private static String generateAuthToken(){
         return UUID.randomUUID().toString();
     }
