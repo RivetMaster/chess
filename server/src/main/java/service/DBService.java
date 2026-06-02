@@ -1,24 +1,24 @@
 package service;
 
-import dataaccess.AuthMemoryDAO;
-import dataaccess.GameMemoryDAO;
-import dataaccess.UserMemoryDAO;
+import dataaccess.*;
 
 public class DBService {
 
-    AuthMemoryDAO authDAO;
-    GameMemoryDAO gameDAO;
-    UserMemoryDAO userDAO;
+    AuthDAO authDAO;
+    GameDAO gameDAO;
+    UserDAO userDAO;
 
-    public DBService(AuthMemoryDAO authDAO, GameMemoryDAO gameDAO, UserMemoryDAO userDAO){
+    public DBService(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO){
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
         this.userDAO = userDAO;
     }
 
-    public void clear(){
+    public Result clear() throws DataAccessException{
         userDAO.clearUsers();
         gameDAO.clearGames();
         authDAO.clearAuth();
+        return new VoidResult();
     }
 }
+
