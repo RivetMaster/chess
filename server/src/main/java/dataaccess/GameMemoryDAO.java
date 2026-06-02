@@ -8,14 +8,17 @@ import java.util.List;
 
 public class GameMemoryDAO implements GameDAO{
     ArrayList<GameData> games;
+    int gameNum;
 
     public GameMemoryDAO(){
         games = new ArrayList<>();
+        gameNum = 0;
     }
 
     //Create a new game.
     public void createGame(GameData game) {
         games.add(game);
+        gameNum++;
     }
 
     //Retrieve a specified game with the given game ID.
@@ -45,6 +48,12 @@ public class GameMemoryDAO implements GameDAO{
     //clear all games
     public void clearGames(){
         games.clear();
+        gameNum = 0;
+    }
+
+    //give new game ID
+    public int newGameID(){
+        return gameNum;
     }
 
     private int getGameIndex(int gameID) throws DataAccessException{
