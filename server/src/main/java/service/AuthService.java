@@ -2,18 +2,29 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
+import model.AuthData;
 
 public class AuthService {
 
-    AuthDAO authDAO;
+    private final AuthDAO authDAO;
 
     public AuthService(AuthDAO authDAO){
         this.authDAO = authDAO;
     }
 
-    public void verifyAuth(String authToken) throws InvalidAuthTokenException, DataAccessException {
+    public boolean verifyAuth(String authToken) throws InvalidAuthTokenException, DataAccessException {
         if(authDAO.getAuth(authToken) == null){
             throw new InvalidAuthTokenException("Unauthorized");
         }
+        return true;
     }
+
+    public AuthData addAuth(String username) throws DataAccessException{
+        return authDAO.createAuth(username);
+    }
+
+    public void clearAuths() throws DataAccessException{
+        authDAO.clearAuth();
+    }
+
 }
