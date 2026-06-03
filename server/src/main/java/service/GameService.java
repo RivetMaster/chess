@@ -6,6 +6,8 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.GameData;
 
+import java.util.ArrayList;
+
 public class GameService {
 
     private final GameDAO gameDAO;
@@ -20,5 +22,14 @@ public class GameService {
         authServ.verifyAuth(authToken);
         GameData game = new GameData(gameDAO.newGameID(), null, null, gameName, new ChessGame());
         gameDAO.createGame(game);
+    }
+
+    public void clearGames() throws DataAccessException{
+        gameDAO.clearGames();
+    }
+
+    public ArrayList<GameData> listGames(String authToken) throws DataAccessException, InvalidAuthTokenException{
+        authServ.verifyAuth(authToken);
+        return gameDAO.listGames();
     }
 }
