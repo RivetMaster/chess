@@ -4,7 +4,6 @@ import chess.ChessGame;
 import model.GameData;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GameMemoryDAO implements GameDAO{
     ArrayList<GameData> games;
@@ -28,7 +27,7 @@ public class GameMemoryDAO implements GameDAO{
     }
 
     //Retrieve all games.
-    public List<GameData> listGames() {
+    public ArrayList<GameData> listGames() {
         return games;
     }
 

@@ -3,7 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public interface GameDAO {
     //Create a new game.
@@ -11,7 +11,7 @@ public interface GameDAO {
     //Retrieve a specified game with the given game ID.
     GameData getGame(int gameID) throws DataAccessException;
     //Retrieve all games.
-    List<GameData> listGames() throws DataAccessException;
+    ArrayList<GameData> listGames() throws DataAccessException;
     //Updates a chess game. It should replace the chess game string corresponding to a given gameID.
         // This is used when players join a game or when a move is made.
     void updateGame(int gameID, ChessGame game) throws DataAccessException;
