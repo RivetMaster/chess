@@ -33,6 +33,7 @@ public class AuthMemoryDAO implements AuthDAO{
     public void deleteAuth(AuthData auth) {
         auths.remove(auth);
     }
+
     //delete all authorizations
     public void clearAuth() {
         auths.clear();
