@@ -90,4 +90,11 @@ public class AuthServiceTest {
         assertThrows(DataAccessException.class,() -> service.delAuth(auth2));
         assert(service.verifyAuth(auth1.authToken()));
     }
+
+    @Test
+    void nullAuth(){
+        assertThrows(InvalidAuthTokenException.class, () -> service.verifyAuth(null));
+    }
+
+
 }
