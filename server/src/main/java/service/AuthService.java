@@ -27,4 +27,8 @@ public class AuthService {
         authDAO.clearAuth();
     }
 
+    public void delAuth(AuthData auth) throws DataAccessException{
+        authDAO.deleteAuth(auth);
+    }
+
 }
