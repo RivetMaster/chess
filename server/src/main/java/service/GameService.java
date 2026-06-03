@@ -8,13 +8,11 @@ import model.GameData;
 
 public class GameService {
 
-    GameDAO gameDAO;
-    AuthDAO authDAO;
-    AuthService authServ;
+    private final GameDAO gameDAO;
+    private final AuthService authServ;
 
     public GameService(GameDAO gameDAO, AuthDAO authDAO){
         this.gameDAO = gameDAO;
-        this.authDAO = authDAO;
         authServ = new AuthService(authDAO);
     }
 

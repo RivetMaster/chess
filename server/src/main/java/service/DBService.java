@@ -4,9 +4,9 @@ import dataaccess.*;
 
 public class DBService {
 
-    AuthDAO authDAO;
-    GameDAO gameDAO;
-    UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final UserDAO userDAO;
 
     public DBService(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO){
         this.authDAO = authDAO;
