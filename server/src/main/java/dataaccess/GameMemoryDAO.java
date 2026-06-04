@@ -33,9 +33,9 @@ public class GameMemoryDAO implements GameDAO{
 
     //Updates a chess game. It should replace the chess game string corresponding to a given gameID.
     // This is used when players join a game or when a move is made.
-    public void updateGame(int gameID, ChessGame game) throws DataAccessException{
+    public void updateGame(int gameID, GameData game) throws DataAccessException{
         int index = getGameIndex(gameID);
-        games.set(index, games.get(index).setGame(game));
+        games.set(index, game);
     }
 
     //Add player to a game (gameID) as the team (color)
@@ -61,6 +61,6 @@ public class GameMemoryDAO implements GameDAO{
                 return i;
             }
         }
-        throw new DataAccessException("Game Does Not Exist");
+        throw new DataAccessException("Invalid GameID");
     }
 }
