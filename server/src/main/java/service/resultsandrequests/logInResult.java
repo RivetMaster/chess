@@ -1,4 +1,6 @@
 package service.resultsandrequests;
 
-public record logInResult(String authToken) implements Result {
+
+
+public record logInResult(String username, String authToken) implements Result {
 }

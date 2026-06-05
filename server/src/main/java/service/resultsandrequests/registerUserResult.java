@@ -1,4 +1,4 @@
 package service.resultsandrequests;
 
-public record registerUserResult(String authToken) implements Result{
+public record registerUserResult(String username, String authToken) implements Result{
 }
