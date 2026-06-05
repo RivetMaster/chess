@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import service.exceptions.InvalidAuthTokenException;
 
 import java.util.ArrayList;
 
@@ -30,11 +31,11 @@ public class AuthMemoryDAO implements AuthDAO{
     }
 
     //Delete an authorization so that it is no longer valid.
-    public void deleteAuth(AuthData auth) throws DataAccessException{
+    public void deleteAuth(AuthData auth) throws InvalidAuthTokenException{
         if(auths.contains(auth)){
             auths.remove(auth);
         } else{
-            throw new DataAccessException("Authorization Does Not Exist");
+            throw new InvalidAuthTokenException("Authorization Does Not Exist");
         }
 
     }

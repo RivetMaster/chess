@@ -7,6 +7,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import service.exceptions.InvalidAuthTokenException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,7 +88,7 @@ public class AuthServiceTest {
         AuthData auth1 = service.addAuth("Jim");
         AuthData auth2 = new AuthData(AuthDAO.generateAuthToken(), "Mary");
 
-        assertThrows(DataAccessException.class,() -> service.delAuth(auth2));
+        assertThrows(InvalidAuthTokenException.class,() -> service.delAuth(auth2));
         assert(service.verifyAuth(auth1.authToken()));
     }
 

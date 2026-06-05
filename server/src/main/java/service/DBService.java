@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.*;
+import service.resultsandrequests.*;
 
 public class DBService {
 
@@ -14,7 +15,7 @@ public class DBService {
         this.userDAO = userDAO;
     }
 
-    public Result clear() throws DataAccessException{
+    public VoidResult clear() throws DataAccessException{
         userDAO.clearUsers();
         gameDAO.clearGames();
         authDAO.clearAuth();

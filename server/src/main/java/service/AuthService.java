@@ -3,6 +3,7 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
+import service.exceptions.InvalidAuthTokenException;
 
 public class AuthService {
 
@@ -27,7 +28,7 @@ public class AuthService {
         authDAO.clearAuth();
     }
 
-    public void delAuth(AuthData auth) throws DataAccessException{
+    public void delAuth(AuthData auth) throws DataAccessException, InvalidAuthTokenException{
         authDAO.deleteAuth(auth);
     }
 
