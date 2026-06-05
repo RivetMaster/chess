@@ -1,6 +1,6 @@
 package service.resultsandrequests;
 
-public record listGamesRequest(String authToken) implements Request {
+public record ListGamesRequest(String authToken) implements Request {
 
     @Override
     public boolean existingFields() {

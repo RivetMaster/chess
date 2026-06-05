@@ -1,7 +1,7 @@
 package service.resultsandrequests;
 
 
-public record logOutRequest(String authToken) implements Request{
+public record LogOutRequest(String authToken) implements Request{
 
     @Override
     public boolean existingFields() {

@@ -6,77 +6,77 @@ import org.junit.jupiter.api.Test;
 import service.exceptions.InvalidAuthTokenException;
 import service.exceptions.InvalidLogInException;
 import service.exceptions.UnavailableException;
-import service.resultsandrequests.logInRequest;
-import service.resultsandrequests.logOutRequest;
-import service.resultsandrequests.registerUserRequest;
-import service.resultsandrequests.registerUserResult;
+import service.resultsandrequests.LogInRequest;
+import service.resultsandrequests.LogOutRequest;
+import service.resultsandrequests.RegisterUserRequest;
+import service.resultsandrequests.RegisterUserResult;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
-    static final AuthDAO authDAO = new AuthMemoryDAO();
-    static final UserDAO userDAO = new UserMemoryDAO();
-    static final UserService service = new UserService(authDAO, userDAO);
+    static final AuthDAO AUTH_DAO = new AuthMemoryDAO();
+    static final UserDAO USER_DAO = new UserMemoryDAO();
+    static final UserService SERVICE = new UserService(AUTH_DAO, USER_DAO);
 
     @BeforeEach
     void clearGames() throws DataAccessException{
-        service.clearUsers();
-        authDAO.clearAuth();
+        SERVICE.clearUsers();
+        AUTH_DAO.clearAuth();
     }
 
     //log out invalid negative test
     @Test
     void logOutNotIn()  {
         assertThrows(InvalidAuthTokenException.class, () ->
-                service.logOut(new logOutRequest("Tim")));
+                SERVICE.logOut(new LogOutRequest("Tim")));
     }
 
     //log in invalid negative test
     @Test
     void logInNotRegistered () {
         assertThrows(InvalidLogInException.class, () ->
-                service.logIn(new logInRequest("Betty", "1234")));
+                SERVICE.logIn(new LogInRequest("Betty", "1234")));
     }
 
     //register same username twice fail, negative test
     @Test
     void registerSameNameTwice() throws UnavailableException, DataAccessException, InvalidLogInException {
-        service.register(new registerUserRequest("Ann", "5678", "hit@gmail.com"));
+        SERVICE.register(new RegisterUserRequest("Ann", "5678", "hit@gmail.com"));
         assertThrows(UnavailableException.class, () ->
-                service.register(new registerUserRequest("Ann", "1234", "hi@gmail.com")));
+                SERVICE.register(new RegisterUserRequest("Ann", "1234", "hi@gmail.com")));
     }
 
     //register user, positive test
     @Test
     void registerUser() throws UnavailableException, DataAccessException, InvalidLogInException {
-        registerUserRequest userInfo = new registerUserRequest("Isaac", "password", "hi@gmail.com");
-        service.register(userInfo);
-        assert(service.getNumUsers() == 1);
-        assert(service.getUser("Isaac").equals(userInfo.toUserData()));
+        RegisterUserRequest userInfo = new RegisterUserRequest("Isaac", "password", "hi@gmail.com");
+        SERVICE.register(userInfo);
+        assert(SERVICE.getNumUsers() == 1);
+        assert(SERVICE.getUser("Isaac").equals(userInfo.toUserData()));
     }
 
     //clear users, positive test
     @Test
     void clearUsers() throws UnavailableException, DataAccessException, InvalidLogInException {
-        registerUserRequest userInfo = new registerUserRequest("Isaac", "password", "hi@gmail.com");
-        registerUserRequest userInfo2 = new registerUserRequest("Isaiah", "password", "hi@gmail.com");
-        service.register(userInfo);
-        service.register(userInfo2);
-        assert(service.getNumUsers() == 2);
-        service.clearUsers();
-        assert(service.getNumUsers() == 0);
+        RegisterUserRequest userInfo = new RegisterUserRequest("Isaac", "password", "hi@gmail.com");
+        RegisterUserRequest userInfo2 = new RegisterUserRequest("Isaiah", "password", "hi@gmail.com");
+        SERVICE.register(userInfo);
+        SERVICE.register(userInfo2);
+        assert(SERVICE.getNumUsers() == 2);
+        SERVICE.clearUsers();
+        assert(SERVICE.getNumUsers() == 0);
     }
 
     //log in and log out user positive test
     @Test
     void logInAndOut() throws UnavailableException, DataAccessException, InvalidAuthTokenException, InvalidLogInException {
-        AuthService authServ = new AuthService(authDAO);
-        registerUserRequest userInfo = new registerUserRequest("Bethany", "password", "hi@gmail.com");
-        registerUserResult auth = service.register(userInfo);
-        assert(service.getNumUsers() == 1);
+        AuthService authServ = new AuthService(AUTH_DAO);
+        RegisterUserRequest userInfo = new RegisterUserRequest("Bethany", "password", "hi@gmail.com");
+        RegisterUserResult auth = SERVICE.register(userInfo);
+        assert(SERVICE.getNumUsers() == 1);
         assert(authServ.verifyAuth(auth.authToken()));
-        service.logOut(new logOutRequest(auth.authToken()));
-        assert(service.getNumUsers() == 1);
+        SERVICE.logOut(new LogOutRequest(auth.authToken()));
+        assert(SERVICE.getNumUsers() == 1);
         assertThrows(InvalidAuthTokenException.class, () -> authServ.verifyAuth(auth.authToken()));
     }
 }

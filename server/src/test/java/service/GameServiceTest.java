@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import server.InvalidRequestException;
 import service.exceptions.InvalidAuthTokenException;
 import service.exceptions.UnavailableException;
-import service.resultsandrequests.createGameRequest;
-import service.resultsandrequests.createGameResult;
-import service.resultsandrequests.joinGameRequest;
-import service.resultsandrequests.listGamesRequest;
+import service.resultsandrequests.CreateGameRequest;
+import service.resultsandrequests.CreateGameResult;
+import service.resultsandrequests.JoinGameRequest;
+import service.resultsandrequests.ListGamesRequest;
 
 import java.util.ArrayList;
 
@@ -25,22 +25,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class GameServiceTest {
-    static final AuthDAO authDAO = new AuthMemoryDAO();
-    static final GameService service = new GameService(new GameMemoryDAO(), authDAO);
+    static final AuthDAO AUTH_DAO = new AuthMemoryDAO();
+    static final GameService SERVICE = new GameService(new GameMemoryDAO(), AUTH_DAO);
 
     @BeforeEach
     void clearGames() throws DataAccessException{
-        service.clearGames();
-        authDAO.clearAuth();
+        SERVICE.clearGames();
+        AUTH_DAO.clearAuth();
     }
 
     //test creating one game
     //positive test for createGame, and listGames
     @Test
     void createGame() throws DataAccessException, InvalidAuthTokenException {
-        AuthData auth = authDAO.createAuth("June");
-        service.createGame(new createGameRequest("Game 1", auth.authToken()));
-        ArrayList<GameData> games = service.listGames(new listGamesRequest(auth.authToken())).games();
+        AuthData auth = AUTH_DAO.createAuth("June");
+        SERVICE.createGame(new CreateGameRequest("Game 1", auth.authToken()));
+        ArrayList<GameData> games = SERVICE.listGames(new ListGamesRequest(auth.authToken())).games();
         assert(games.size() == 1);
         assert(games.getFirst().gameName().equals("Game 1"));
     }
@@ -48,35 +48,35 @@ public class GameServiceTest {
     //test clears games positive
     @Test
     void clear() throws DataAccessException, InvalidAuthTokenException {
-        AuthData auth = authDAO.createAuth("July");
-        service.createGame(new createGameRequest("game 2", auth.authToken()));
-        service.clearGames();
-        assert(service.listGames(new listGamesRequest(auth.authToken())).games().isEmpty());
+        AuthData auth = AUTH_DAO.createAuth("July");
+        SERVICE.createGame(new CreateGameRequest("game 2", auth.authToken()));
+        SERVICE.clearGames();
+        assert(SERVICE.listGames(new ListGamesRequest(auth.authToken())).games().isEmpty());
     }
 
     //test throws error when creating game without authorization
     //create game negative
     @Test
     void createGameUnauthorized() throws DataAccessException, InvalidAuthTokenException{
-        assertThrows(InvalidAuthTokenException.class, () -> service.createGame(new createGameRequest("game 3", "token")));
-        AuthData auth = authDAO.createAuth("Mary");
-        assert(service.listGames(new listGamesRequest(auth.authToken())).games().isEmpty());
+        assertThrows(InvalidAuthTokenException.class, () -> SERVICE.createGame(new CreateGameRequest("game 3", "token")));
+        AuthData auth = AUTH_DAO.createAuth("Mary");
+        assert(SERVICE.listGames(new ListGamesRequest(auth.authToken())).games().isEmpty());
     }
 
     //tests list games negative
     @Test
     void listGamesUnauthorized() {
         assertThrows(InvalidAuthTokenException.class, () ->
-                service.listGames(new listGamesRequest("3")));
+                SERVICE.listGames(new ListGamesRequest("3")));
     }
 
     //positive test for joining Game
     @Test
     void joinGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
-        AuthData auth = authDAO.createAuth("Kim");
-        createGameResult result = service.createGame(new createGameRequest("Game 4", auth.authToken()));
-        service.joinGame(new joinGameRequest(result.gameID(), WHITE, auth));
-        GameData game = service.listGames(new listGamesRequest(auth.authToken())).games().getFirst();
+        AuthData auth = AUTH_DAO.createAuth("Kim");
+        CreateGameResult result = SERVICE.createGame(new CreateGameRequest("Game 4", auth.authToken()));
+        SERVICE.joinGame(new JoinGameRequest(result.gameID(), WHITE, auth));
+        GameData game = SERVICE.listGames(new ListGamesRequest(auth.authToken())).games().getFirst();
         assert(game.whiteUsername().equals("Kim"));
         assert(game.blackUsername() == null);
     }
@@ -84,32 +84,32 @@ public class GameServiceTest {
     //negative test for joining game
     @Test
     void joinGameFull() throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
-        AuthData auth1 = authDAO.createAuth("Pam");
-        AuthData auth2 = authDAO.createAuth("Ruby");
-        createGameResult game = service.createGame(new createGameRequest("Game 5", auth1.authToken()));
-        service.joinGame(new joinGameRequest(game.gameID(), WHITE, auth1));
-        assertThrows(UnavailableException.class, () -> service.joinGame(new joinGameRequest(game.gameID(), WHITE, auth2)));
+        AuthData auth1 = AUTH_DAO.createAuth("Pam");
+        AuthData auth2 = AUTH_DAO.createAuth("Ruby");
+        CreateGameResult game = SERVICE.createGame(new CreateGameRequest("Game 5", auth1.authToken()));
+        SERVICE.joinGame(new JoinGameRequest(game.gameID(), WHITE, auth1));
+        assertThrows(UnavailableException.class, () -> SERVICE.joinGame(new JoinGameRequest(game.gameID(), WHITE, auth2)));
     }
 
     //positive test for leaveGame
     @Test
     void leaveGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
-        AuthData auth1 = authDAO.createAuth("Harry");
-        createGameResult result = service.createGame(new createGameRequest("Game 6", auth1.authToken()));
-        service.joinGame(new joinGameRequest(result.gameID(), WHITE, auth1));
-        GameData game = service.listGames(new listGamesRequest(auth1.authToken())).games().getFirst();
+        AuthData auth1 = AUTH_DAO.createAuth("Harry");
+        CreateGameResult result = SERVICE.createGame(new CreateGameRequest("Game 6", auth1.authToken()));
+        SERVICE.joinGame(new JoinGameRequest(result.gameID(), WHITE, auth1));
+        GameData game = SERVICE.listGames(new ListGamesRequest(auth1.authToken())).games().getFirst();
         assert(game.whiteUsername().equals("Harry"));
-        service.leaveGame(new joinGameRequest(game.gameID(), WHITE, auth1));
-        game = service.listGames(new listGamesRequest(auth1.authToken())).games().getFirst();
+        SERVICE.leaveGame(new JoinGameRequest(game.gameID(), WHITE, auth1));
+        game = SERVICE.listGames(new ListGamesRequest(auth1.authToken())).games().getFirst();
         assert(game.whiteUsername() == null);
     }
 
     //negative test for leaveGame
     @Test
     void leaveGameNotIn() throws DataAccessException, InvalidAuthTokenException {
-        AuthData auth = authDAO.createAuth("Gary");
-        createGameResult game = service.createGame(new createGameRequest("Game 7", auth.authToken()));
-        assertThrows(InvalidRequestException.class, () -> service.leaveGame(new joinGameRequest(game.gameID(), WHITE, auth)));
+        AuthData auth = AUTH_DAO.createAuth("Gary");
+        CreateGameResult game = SERVICE.createGame(new CreateGameRequest("Game 7", auth.authToken()));
+        assertThrows(InvalidRequestException.class, () -> SERVICE.leaveGame(new JoinGameRequest(game.gameID(), WHITE, auth)));
     }
 
 }

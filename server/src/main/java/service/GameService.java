@@ -21,23 +21,24 @@ public class GameService {
         authServ = new AuthService(authDAO);
     }
 
-    public createGameResult createGame(createGameRequest req) throws DataAccessException, InvalidAuthTokenException {
+    public CreateGameResult createGame(CreateGameRequest req) throws DataAccessException, InvalidAuthTokenException {
         authServ.verifyAuth(req.authToken());
         GameData game = new GameData(gameDAO.newGameID(), null, null, req.gameName(), new ChessGame());
         gameDAO.createGame(game);
-        return new createGameResult(game.gameID());
+        return new CreateGameResult(game.gameID());
     }
 
     public void clearGames() throws DataAccessException{
         gameDAO.clearGames();
     }
 
-    public listGamesResult listGames(listGamesRequest req) throws DataAccessException, InvalidAuthTokenException{
+    public ListGamesResult listGames(ListGamesRequest req) throws DataAccessException, InvalidAuthTokenException{
         authServ.verifyAuth(req.authToken());
-        return new listGamesResult(gameDAO.listGames());
+        return new ListGamesResult(gameDAO.listGames());
     }
 
-    public VoidResult joinGame(joinGameRequest req) throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
+    public VoidResult joinGame(JoinGameRequest req)
+            throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         authServ.verifyAuth(req.auth().authToken());
         GameData game = gameDAO.getGame(req.gameID());
         if(req.playerColor() == WHITE){
@@ -54,7 +55,7 @@ public class GameService {
         throw new UnavailableException("Team Not Available");
     }
 
-    public void leaveGame(joinGameRequest req) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
+    public void leaveGame(JoinGameRequest req) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         authServ.verifyAuth(req.auth().authToken());
         GameData game = gameDAO.getGame(req.gameID());
         if(req.playerColor() == WHITE && game.whiteUsername() != null && game.whiteUsername().equals(req.auth().username())){

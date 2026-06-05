@@ -1,6 +1,6 @@
 package service.resultsandrequests;
 
-public record logInRequest(String username, String password) implements Request{
+public record LogInRequest(String username, String password) implements Request{
 
     @Override
     public boolean existingFields() {

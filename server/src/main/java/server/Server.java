@@ -61,7 +61,7 @@ public class Server {
     private void joinGame(Context ctx) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException, UnavailableException {
         //requires authorization. Gives gameID and playerColor
         String authToken = ctx.header("Authorization");
-        joinGameRequest req = serialize.fromJson(ctx.body(), joinGameRequest.class);
+        JoinGameRequest req = serialize.fromJson(ctx.body(), JoinGameRequest.class);
         req = req.setAuth(new AuthData(authToken, authServ.getUsername(authToken)));
         if(!req.existingFields()){
             throw new InvalidRequestException("Expecting GameID, playerColor, and valid authorization.");
@@ -72,30 +72,30 @@ public class Server {
     private void createGame(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
         //requires authorization
         String authToken = ctx.header("Authorization");
-        createGameRequest req = serialize.fromJson(ctx.body(), createGameRequest.class);
+        CreateGameRequest req = serialize.fromJson(ctx.body(), CreateGameRequest.class);
         req = req.setAuthToken(authToken);
         if(!req.existingFields()){
             throw new InvalidRequestException("Expecting gameName and AuthToken.");
         }
-        createGameResult result = gameServ.createGame(req);
+        CreateGameResult result = gameServ.createGame(req);
         ctx.json(serialize.toJson(result));
     }
 
     private void listGames(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
         //auth required. returns list of games
         String authToken = ctx.header("Authorization");
-        listGamesRequest req = new listGamesRequest(authToken);
+        ListGamesRequest req = new ListGamesRequest(authToken);
         if(!req.existingFields()){
             throw new InvalidRequestException("Expecting AuthToken");
         }
-        listGamesResult result = gameServ.listGames(req);
+        ListGamesResult result = gameServ.listGames(req);
         ctx.json(serialize.toJson(result));
     }
 
     private void logOut(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
         //logs out, takes in authToken, returns nothing.
         String authToken = ctx.header("Authorization");
-        logOutRequest req = new logOutRequest(authToken);
+        LogOutRequest req = new LogOutRequest(authToken);
         if(!req.existingFields()){
             throw new InvalidRequestException("Expecting AuthToken");
         }
@@ -104,23 +104,23 @@ public class Server {
 
     private void logIn(Context ctx) throws InvalidRequestException, DataAccessException, InvalidLogInException {
         //Logs in an existing user (takes in user, password), (returns a new authToken)
-        logInRequest req = serialize.fromJson(ctx.body(), logInRequest.class);
+        LogInRequest req = serialize.fromJson(ctx.body(), LogInRequest.class);
         if(!req.existingFields()){
             //invalid request if missing fields or just whitespace
             throw new InvalidRequestException("Expecting username and password.");
         }
-        logInResult result = userServ.logIn(req);
+        LogInResult result = userServ.logIn(req);
         ctx.json(serialize.toJson(result)); //return authToken
     }
 
     private void register(Context ctx) throws UnavailableException, DataAccessException, InvalidRequestException, InvalidLogInException {
         //should be given user, password, and email
-        registerUserRequest req = serialize.fromJson(ctx.body(), registerUserRequest.class);
+        RegisterUserRequest req = serialize.fromJson(ctx.body(), RegisterUserRequest.class);
         if(!req.existingFields()){
             //invalid request if missing field or just whitespace
             throw new InvalidRequestException("Expecting username, password, and email.");
         }
-        registerUserResult result = userServ.register(req);
+        RegisterUserResult result = userServ.register(req);
         ctx.json(serialize.toJson(result));
     }
 
