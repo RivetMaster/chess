@@ -2,12 +2,8 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
-import model.AuthData;
-import model.UserData;
-import server.InvalidRequestException;
-import service.exceptions.InvalidAuthTokenException;
-import service.exceptions.InvalidLogInException;
-import service.exceptions.UnavailableException;
+import model.*;
+import service.exceptions.*;
 import service.resultsandrequests.*;
 
 
@@ -25,7 +21,7 @@ public class UserService {
     }
 
     //register new user in database with login  info, and log them in.
-    public registerUserResult register(registerUserRequest req) throws DataAccessException, UnavailableException {
+    public registerUserResult register(registerUserRequest req) throws DataAccessException, UnavailableException, InvalidLogInException {
         if(getUser(req.username()) != null) {
             throw new UnavailableException("Username Taken");
         }
