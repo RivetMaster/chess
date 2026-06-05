@@ -42,7 +42,7 @@ public class GameMemoryDAO implements GameDAO{
     //Add player to a game (gameID) as the team (color)
     public void addPlayer(int gameID, ChessGame.TeamColor color, String username) throws InvalidRequestException {
         int index = getGameIndex(gameID);
-        games.set(index, games.get(index).setUser(username, color));
+        updateGame(gameID, games.get(index).setUser(username, color));
     }
 
     //clear all games
