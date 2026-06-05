@@ -9,4 +9,6 @@ public interface UserDAO {
     UserData getUser(String username) throws DataAccessException;
     //clear all users
     void clearUsers() throws DataAccessException;
+    //return number of users
+    int getNumUsers() throws DataAccessException;
 }

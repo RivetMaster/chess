@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.AuthMemoryDAO;
-import dataaccess.DataAccessException;
-import model.AuthData;
+import dataaccess.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.exceptions.InvalidAuthTokenException;
@@ -18,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
     static final AuthDAO authDAO = new AuthMemoryDAO();
-    static final UserService service = new UserService(authDAO);
+    static final UserDAO userDAO = new UserMemoryDAO();
+    static final UserService service = new UserService(authDAO, userDAO);
 
     @BeforeEach
     void clearGames() throws DataAccessException{

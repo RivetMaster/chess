@@ -2,22 +2,21 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
+import dataaccess.UserDAO;
 import model.*;
 import service.exceptions.*;
 import service.resultsandrequests.*;
 
 
-import java.util.ArrayList;
-
 public class UserService {
 
     private final AuthService authServ;
 
-    private final ArrayList<UserData> users;
+    private final UserDAO users;
 
-    public UserService(AuthDAO authDAO){
+    public UserService(AuthDAO authDAO, UserDAO userDAO){
         authServ = new AuthService(authDAO);
-        users = new ArrayList<>();
+        users = userDAO;
     }
 
     //register new user in database with login  info, and log them in.
@@ -25,18 +24,17 @@ public class UserService {
         if(getUser(req.username()) != null) {
             throw new UnavailableException("Username Taken");
         }
-        users.add(new UserData(req.username(), req.password(), req.email()));
+        users.createUser(new UserData(req.username(), req.password(), req.email()));
         logInResult log = logIn(new logInRequest(req.username(), req.password()));
         return new registerUserResult(log.username(), log.authToken());
     }
 
     //login user if username and password match in database
     public logInResult logIn(logInRequest req) throws DataAccessException, InvalidLogInException {
-        for(UserData u : users){
-            if(u.username().equals(req.username()) && u.password().equals(req.password())){
-                AuthData auth = authServ.addAuth(req.username());
-                return new logInResult(req.username(), auth.authToken());
-            }
+        UserData u = users.getUser(req.username());
+        if(u != null && u.password().equals(req.password())){
+            AuthData auth = authServ.addAuth(req.username());
+            return new logInResult(req.username(), auth.authToken());
         }
         throw new InvalidLogInException("Invalid Login");
     }
@@ -47,21 +45,16 @@ public class UserService {
         return new VoidResult();
     }
 
-    public UserData getUser(String username){
-        for(UserData u : users){
-            if(u.username().equals(username)){
-                return u;
-            }
-        }
-        return null;
+    public UserData getUser(String username) throws DataAccessException {
+        return users.getUser(username);
     }
 
-    public int getNumUsers(){
-        return users.size();
+    public int getNumUsers() throws DataAccessException{
+        return users.getNumUsers();
     }
 
     //clear database of all users
-    public void clearUsers(){
-        users.clear();
+    public void clearUsers() throws DataAccessException {
+        users.clearUsers();
     }
 }

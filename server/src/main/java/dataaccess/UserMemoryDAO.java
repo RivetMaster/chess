@@ -27,6 +27,10 @@ public class UserMemoryDAO implements  UserDAO{
         return null;
     }
 
+    public int getNumUsers(){
+        return users.size();
+    }
+
     //clear all users
     public void clearUsers() {
         users.clear();
