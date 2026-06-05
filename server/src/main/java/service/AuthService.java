@@ -28,8 +28,8 @@ public class AuthService {
         authDAO.clearAuth();
     }
 
-    public void delAuth(AuthData auth) throws DataAccessException, InvalidAuthTokenException{
-        authDAO.deleteAuth(auth);
+    public void delAuth(String authToken) throws DataAccessException, InvalidAuthTokenException{
+        authDAO.deleteAuth(authToken);
     }
 
 }

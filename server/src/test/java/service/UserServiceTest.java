@@ -30,7 +30,7 @@ public class UserServiceTest {
     @Test
     void logOutNotIn()  {
         assertThrows(InvalidAuthTokenException.class, () ->
-                service.logOut(new logOutRequest(new AuthData("3", "Tim"))));
+                service.logOut(new logOutRequest("Tim")));
     }
 
     //log in invalid negative test
@@ -77,7 +77,7 @@ public class UserServiceTest {
         registerUserResult auth = service.register(userInfo);
         assert(service.getNumUsers() == 1);
         assert(authServ.verifyAuth(auth.authToken()));
-        service.logOut(new logOutRequest(new AuthData(auth.authToken(), "Bethany")));
+        service.logOut(new logOutRequest(auth.authToken()));
         assert(service.getNumUsers() == 1);
         assertThrows(InvalidAuthTokenException.class, () -> authServ.verifyAuth(auth.authToken()));
     }

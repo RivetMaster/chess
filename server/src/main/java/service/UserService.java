@@ -43,7 +43,7 @@ public class UserService {
 
     //log out by deleting authToken from database. Don't delete user from database
     public VoidResult logOut(logOutRequest req) throws DataAccessException, InvalidAuthTokenException {
-        authServ.delAuth(req.auth());
+        authServ.delAuth(req.authToken());
         return new VoidResult();
     }
 

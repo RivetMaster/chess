@@ -31,13 +31,11 @@ public class AuthMemoryDAO implements AuthDAO{
     }
 
     //Delete an authorization so that it is no longer valid.
-    public void deleteAuth(AuthData auth) throws InvalidAuthTokenException{
-        if(auths.contains(auth)){
-            auths.remove(auth);
-        } else{
+    public void deleteAuth(String authToken) throws InvalidAuthTokenException{
+        boolean success = auths.removeIf(a -> a.authToken().equals(authToken));
+        if(!success){
             throw new InvalidAuthTokenException("Authorization Does Not Exist");
         }
-
     }
 
     //delete all authorizations

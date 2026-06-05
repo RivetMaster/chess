@@ -11,7 +11,7 @@ public interface AuthDAO{
     //Retrieve an authorization given an authToken.
     AuthData getAuth(String authToken) throws DataAccessException;
     //Delete an authorization so that it is no longer valid.
-    void deleteAuth(AuthData auth) throws DataAccessException, InvalidAuthTokenException;
+    void deleteAuth(String authToken) throws DataAccessException, InvalidAuthTokenException;
     //delete all authorizations
     void clearAuth() throws DataAccessException;
     //generate new authorization token

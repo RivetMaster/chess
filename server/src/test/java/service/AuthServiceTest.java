@@ -75,7 +75,7 @@ public class AuthServiceTest {
         AuthData auth1 = service.addAuth("Ham");
         AuthData auth2 = service.addAuth("Cheese");
 
-        service.delAuth(auth1);
+        service.delAuth(auth1.authToken());
 
         assertThrows(InvalidAuthTokenException.class, () -> service.verifyAuth(auth1.authToken()));
         assert(service.verifyAuth(auth2.authToken()));
@@ -88,7 +88,7 @@ public class AuthServiceTest {
         AuthData auth1 = service.addAuth("Jim");
         AuthData auth2 = new AuthData(AuthDAO.generateAuthToken(), "Mary");
 
-        assertThrows(InvalidAuthTokenException.class,() -> service.delAuth(auth2));
+        assertThrows(InvalidAuthTokenException.class,() -> service.delAuth(auth2.authToken()));
         assert(service.verifyAuth(auth1.authToken()));
     }
 
