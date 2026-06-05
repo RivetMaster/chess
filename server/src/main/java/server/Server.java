@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.GameData;
+import model.AuthData;
 import service.*;
 import service.exceptions.*;
 import service.resultsandrequests.*;
@@ -40,6 +40,7 @@ public class Server {
                 .delete("/session", this::logOut)
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
+                .put("/game", this::joinGame)
                 .exception(InvalidAuthTokenException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(InvalidLogInException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(DataAccessException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 500))
@@ -57,10 +58,22 @@ public class Server {
         dbServ.clear();
     }
 
-    private void createGame(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+    private void joinGame(Context ctx) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException, UnavailableException {
+        //requires authorization. Gives gameID and playerColor
         String authToken = ctx.header("Authorization");
-        GameData game = serialize.fromJson(ctx.body(), GameData.class);
-        createGameRequest req = new createGameRequest(game.gameName(), authToken);
+        joinGameRequest req = serialize.fromJson(ctx.body(), joinGameRequest.class);
+        req = req.setAuth(new AuthData(authToken, authServ.getUsername(authToken)));
+        if(!req.existingFields()){
+            throw new InvalidRequestException("Expecting GameID, playerColor, and valid authorization.");
+        }
+        gameServ.joinGame(req);
+    }
+
+    private void createGame(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+        //requires authorization
+        String authToken = ctx.header("Authorization");
+        createGameRequest req = serialize.fromJson(ctx.body(), createGameRequest.class);
+        req = req.setAuthToken(authToken);
         if(!req.existingFields()){
             throw new InvalidRequestException("Expecting gameName and AuthToken.");
         }

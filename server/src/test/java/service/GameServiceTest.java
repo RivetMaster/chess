@@ -10,6 +10,7 @@ import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.InvalidRequestException;
 import service.exceptions.InvalidAuthTokenException;
 import service.exceptions.UnavailableException;
 import service.resultsandrequests.createGameRequest;
@@ -71,7 +72,7 @@ public class GameServiceTest {
 
     //positive test for joining Game
     @Test
-    void joinGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException {
+    void joinGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthData auth = authDAO.createAuth("Kim");
         createGameResult result = service.createGame(new createGameRequest("Game 4", auth.authToken()));
         service.joinGame(new joinGameRequest(result.gameID(), WHITE, auth));
@@ -82,7 +83,7 @@ public class GameServiceTest {
 
     //negative test for joining game
     @Test
-    void joinGameFull() throws DataAccessException, InvalidAuthTokenException, UnavailableException {
+    void joinGameFull() throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthData auth1 = authDAO.createAuth("Pam");
         AuthData auth2 = authDAO.createAuth("Ruby");
         createGameResult game = service.createGame(new createGameRequest("Game 5", auth1.authToken()));
@@ -92,7 +93,7 @@ public class GameServiceTest {
 
     //positive test for leaveGame
     @Test
-    void leaveGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException {
+    void leaveGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthData auth1 = authDAO.createAuth("Harry");
         createGameResult result = service.createGame(new createGameRequest("Game 6", auth1.authToken()));
         service.joinGame(new joinGameRequest(result.gameID(), WHITE, auth1));
@@ -108,7 +109,7 @@ public class GameServiceTest {
     void leaveGameNotIn() throws DataAccessException, InvalidAuthTokenException {
         AuthData auth = authDAO.createAuth("Gary");
         createGameResult game = service.createGame(new createGameRequest("Game 7", auth.authToken()));
-        assertThrows(UnavailableException.class, () -> service.leaveGame(new joinGameRequest(game.gameID(), WHITE, auth)));
+        assertThrows(InvalidRequestException.class, () -> service.leaveGame(new joinGameRequest(game.gameID(), WHITE, auth)));
     }
 
 }

@@ -5,6 +5,7 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.GameData;
+import server.InvalidRequestException;
 import service.exceptions.*;
 import service.resultsandrequests.*;
 
@@ -36,35 +37,33 @@ public class GameService {
         return new listGamesResult(gameDAO.listGames());
     }
 
-    public VoidResult joinGame(joinGameRequest req) throws DataAccessException, InvalidAuthTokenException, UnavailableException {
-        //want to add so that same person can't join same game as both teams, but still allow two people with same
-        //username?
+    public VoidResult joinGame(joinGameRequest req) throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         authServ.verifyAuth(req.auth().authToken());
         GameData game = gameDAO.getGame(req.gameID());
-        if(req.color() == WHITE){
+        if(req.playerColor() == WHITE){
             if(game.whiteUsername() == null){
-                gameDAO.addPlayer(req.gameID(), req.color(), req.auth().username());
+                gameDAO.addPlayer(req.gameID(), req.playerColor(), req.auth().username());
                 return new VoidResult();
             }
         } else {
             if(game.blackUsername() == null){
-                gameDAO.addPlayer(req.gameID(), req.color(), req.auth().username());
+                gameDAO.addPlayer(req.gameID(), req.playerColor(), req.auth().username());
                 return new VoidResult();
             }
         }
         throw new UnavailableException("Team Not Available");
     }
 
-    public void leaveGame(joinGameRequest req) throws DataAccessException, InvalidAuthTokenException, UnavailableException {
+    public void leaveGame(joinGameRequest req) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         authServ.verifyAuth(req.auth().authToken());
         GameData game = gameDAO.getGame(req.gameID());
-        if(req.color() == WHITE && game.whiteUsername() != null && game.whiteUsername().equals(req.auth().username())){
-            gameDAO.addPlayer(req.gameID(), req.color(), null);
+        if(req.playerColor() == WHITE && game.whiteUsername() != null && game.whiteUsername().equals(req.auth().username())){
+            gameDAO.addPlayer(req.gameID(), req.playerColor(), null);
         }
-        else if(req.color() == BLACK && game.blackUsername() != null && game.blackUsername().equals(req.auth().username())){
-            gameDAO.addPlayer(req.gameID(), req.color(), null);
+        else if(req.playerColor() == BLACK && game.blackUsername() != null && game.blackUsername().equals(req.auth().username())){
+            gameDAO.addPlayer(req.gameID(), req.playerColor(), null);
         } else {
-            throw new UnavailableException("Couldn't Leave Game");
+            throw new InvalidRequestException("Couldn't Leave Game");
         }
     }
 }

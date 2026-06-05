@@ -32,4 +32,11 @@ public class AuthService {
         authDAO.deleteAuth(authToken);
     }
 
+    public String getUsername(String authToken) throws DataAccessException, InvalidAuthTokenException {
+        if(verifyAuth(authToken)){
+            return authDAO.getAuth(authToken).username();
+        }
+        return null;
+    }
+
 }

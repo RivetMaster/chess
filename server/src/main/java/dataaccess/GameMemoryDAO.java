@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import server.InvalidRequestException;
 
 import java.util.ArrayList;
 
@@ -21,7 +22,7 @@ public class GameMemoryDAO implements GameDAO{
     }
 
     //Retrieve a specified game with the given game ID.
-    public GameData getGame(int gameID) throws DataAccessException{
+    public GameData getGame(int gameID) throws InvalidRequestException {
         int index = getGameIndex(gameID);
         return games.get(index);
     }
@@ -33,13 +34,13 @@ public class GameMemoryDAO implements GameDAO{
 
     //Updates a chess game. It should replace the chess game string corresponding to a given gameID.
     // This is used when players join a game or when a move is made.
-    public void updateGame(int gameID, GameData game) throws DataAccessException{
+    public void updateGame(int gameID, GameData game) throws InvalidRequestException {
         int index = getGameIndex(gameID);
         games.set(index, game);
     }
 
     //Add player to a game (gameID) as the team (color)
-    public void addPlayer(int gameID, ChessGame.TeamColor color, String username) throws DataAccessException{
+    public void addPlayer(int gameID, ChessGame.TeamColor color, String username) throws InvalidRequestException {
         int index = getGameIndex(gameID);
         games.set(index, games.get(index).setUser(username, color));
     }
@@ -55,12 +56,12 @@ public class GameMemoryDAO implements GameDAO{
         return gameNum + 1;
     }
 
-    private int getGameIndex(int gameID) throws DataAccessException{
+    private int getGameIndex(int gameID) throws InvalidRequestException {
         for(int i = 0; i < games.size(); i++){
             if(games.get(i).gameID() == gameID){
                 return i;
             }
         }
-        throw new DataAccessException("Invalid GameID");
+        throw new InvalidRequestException("Invalid GameID");
     }
 }
