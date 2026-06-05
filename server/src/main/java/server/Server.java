@@ -8,7 +8,11 @@ import service.AuthService;
 import service.DBService;
 import service.GameService;
 import service.UserService;
+import service.exceptions.InvalidAuthTokenException;
+import service.exceptions.InvalidLogInException;
 import service.exceptions.UnavailableException;
+import service.resultsandrequests.logInRequest;
+import service.resultsandrequests.logInResult;
 import service.resultsandrequests.registerUserRequest;
 import service.resultsandrequests.registerUserResult;
 
@@ -39,6 +43,11 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .delete("/db", this::clear)
                 .post("/user", this::register)
+                .post("/session", this::logIn)
+                .exception(InvalidAuthTokenException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
+                .exception(InvalidLogInException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
+                .exception(DataAccessException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 500))
+                .exception(UnavailableException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 403))
                 .exception(InvalidRequestException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 400));
 
     }
@@ -52,10 +61,21 @@ public class Server {
         dbServ.clear();
     }
 
-    private void register(Context ctx) throws UnavailableException, DataAccessException, InvalidRequestException {
+    private void logIn(Context ctx) throws InvalidRequestException, DataAccessException, InvalidLogInException {
+        //Logs in an existing user (takes in user, password), (returns a new authToken)
+        logInRequest req = serialize.fromJson(ctx.body(), logInRequest.class);
+        if(!req.existingFields()){
+            //invalid request if missing fields or just whitespace
+            throw new InvalidRequestException("Expecting username and password.");
+        }
+        logInResult result = userServ.logIn(req);
+        ctx.json(serialize.toJson(result)); //return authToken
+    }
+
+    private void register(Context ctx) throws UnavailableException, DataAccessException, InvalidRequestException, InvalidLogInException {
         //should be given user, password, and email
         registerUserRequest req = serialize.fromJson(ctx.body(), registerUserRequest.class);
-        if(req.email()==null || req.username() == null || req.password() == null || req.email().isBlank() || req.username().isBlank() || req.password().isBlank()){
+        if(!req.existingFields()){
             //invalid request if missing field or just whitespace
             throw new InvalidRequestException("Expecting username, password, and email.");
         }
