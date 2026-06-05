@@ -11,10 +11,7 @@ import service.UserService;
 import service.exceptions.InvalidAuthTokenException;
 import service.exceptions.InvalidLogInException;
 import service.exceptions.UnavailableException;
-import service.resultsandrequests.logInRequest;
-import service.resultsandrequests.logInResult;
-import service.resultsandrequests.registerUserRequest;
-import service.resultsandrequests.registerUserResult;
+import service.resultsandrequests.*;
 
 import java.util.Map;
 
@@ -32,7 +29,7 @@ public class Server {
         GameDAO gameDAO = new GameMemoryDAO();
         UserDAO userDAO = new UserMemoryDAO();
         authServ = new AuthService(authDAO);
-        userServ = new UserService(authDAO);
+        userServ = new UserService(authDAO, userDAO);
         gameServ = new GameService(gameDAO, authDAO);
         dbServ = new DBService(authDAO, gameDAO, userDAO);
 
@@ -44,6 +41,7 @@ public class Server {
                 .delete("/db", this::clear)
                 .post("/user", this::register)
                 .post("/session", this::logIn)
+                .delete("/session", this::logOut)
                 .exception(InvalidAuthTokenException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(InvalidLogInException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(DataAccessException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 500))
@@ -59,6 +57,18 @@ public class Server {
 
     private void clear(Context ctx) throws DataAccessException {
         dbServ.clear();
+    }
+
+    private void logOut(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+        //logs out, takes in authToken, returns nothing.
+        String authToken = ctx.header("Authorization");
+        Map<String, String> headers = ctx.headerMap();
+        logOutRequest req = new logOutRequest(authToken);
+        if(!req.existingFields()){
+            throw new InvalidRequestException("Expecting AuthToken");
+        }
+        userServ.logOut(req);
+        ctx.status(200);
     }
 
     private void logIn(Context ctx) throws InvalidRequestException, DataAccessException, InvalidLogInException {
