@@ -24,7 +24,7 @@ public class GameService {
         authServ.verifyAuth(req.authToken());
         GameData game = new GameData(gameDAO.newGameID(), null, null, req.gameName(), new ChessGame());
         gameDAO.createGame(game);
-        return new createGameResult(game);
+        return new createGameResult(game.gameID());
     }
 
     public void clearGames() throws DataAccessException{

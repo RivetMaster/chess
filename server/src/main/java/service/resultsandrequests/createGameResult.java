@@ -1,6 +1,5 @@
 package service.resultsandrequests;
 
-import model.GameData;
 
-public record createGameResult(GameData game) {
+public record createGameResult(int gameID) implements Result{
 }

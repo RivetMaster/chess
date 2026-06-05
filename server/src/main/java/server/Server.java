@@ -4,13 +4,9 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
-import service.AuthService;
-import service.DBService;
-import service.GameService;
-import service.UserService;
-import service.exceptions.InvalidAuthTokenException;
-import service.exceptions.InvalidLogInException;
-import service.exceptions.UnavailableException;
+import model.GameData;
+import service.*;
+import service.exceptions.*;
 import service.resultsandrequests.*;
 
 import java.util.Map;
@@ -42,6 +38,8 @@ public class Server {
                 .post("/user", this::register)
                 .post("/session", this::logIn)
                 .delete("/session", this::logOut)
+                .get("/game", this::listGames)
+                .post("/game", this::createGame)
                 .exception(InvalidAuthTokenException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(InvalidLogInException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(DataAccessException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 500))
@@ -59,16 +57,36 @@ public class Server {
         dbServ.clear();
     }
 
+    private void createGame(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+        String authToken = ctx.header("Authorization");
+        GameData game = serialize.fromJson(ctx.body(), GameData.class);
+        createGameRequest req = new createGameRequest(game.gameName(), authToken);
+        if(!req.existingFields()){
+            throw new InvalidRequestException("Expecting gameName and AuthToken.");
+        }
+        createGameResult result = gameServ.createGame(req);
+        ctx.json(serialize.toJson(result));
+    }
+
+    private void listGames(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+        //auth required. returns list of games
+        String authToken = ctx.header("Authorization");
+        listGamesRequest req = new listGamesRequest(authToken);
+        if(!req.existingFields()){
+            throw new InvalidRequestException("Expecting AuthToken");
+        }
+        listGamesResult result = gameServ.listGames(req);
+        ctx.json(serialize.toJson(result));
+    }
+
     private void logOut(Context ctx) throws InvalidRequestException, DataAccessException, InvalidAuthTokenException {
         //logs out, takes in authToken, returns nothing.
         String authToken = ctx.header("Authorization");
-        Map<String, String> headers = ctx.headerMap();
         logOutRequest req = new logOutRequest(authToken);
         if(!req.existingFields()){
             throw new InvalidRequestException("Expecting AuthToken");
         }
         userServ.logOut(req);
-        ctx.status(200);
     }
 
     private void logIn(Context ctx) throws InvalidRequestException, DataAccessException, InvalidLogInException {

@@ -52,7 +52,7 @@ public class GameMemoryDAO implements GameDAO{
 
     //give new game ID
     public int newGameID(){
-        return gameNum;
+        return gameNum + 1;
     }
 
     private int getGameIndex(int gameID) throws DataAccessException{

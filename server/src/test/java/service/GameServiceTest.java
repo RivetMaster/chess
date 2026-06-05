@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import service.exceptions.InvalidAuthTokenException;
 import service.exceptions.UnavailableException;
 import service.resultsandrequests.createGameRequest;
+import service.resultsandrequests.createGameResult;
 import service.resultsandrequests.joinGameRequest;
 import service.resultsandrequests.listGamesRequest;
 
@@ -72,9 +73,9 @@ public class GameServiceTest {
     @Test
     void joinGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException {
         AuthData auth = authDAO.createAuth("Kim");
-        GameData game = service.createGame(new createGameRequest("Game 4", auth.authToken())).game();
-        service.joinGame(new joinGameRequest(game.gameID(), WHITE, auth));
-        game = service.listGames(new listGamesRequest(auth.authToken())).games().getFirst();
+        createGameResult result = service.createGame(new createGameRequest("Game 4", auth.authToken()));
+        service.joinGame(new joinGameRequest(result.gameID(), WHITE, auth));
+        GameData game = service.listGames(new listGamesRequest(auth.authToken())).games().getFirst();
         assert(game.whiteUsername().equals("Kim"));
         assert(game.blackUsername() == null);
     }
@@ -84,7 +85,7 @@ public class GameServiceTest {
     void joinGameFull() throws DataAccessException, InvalidAuthTokenException, UnavailableException {
         AuthData auth1 = authDAO.createAuth("Pam");
         AuthData auth2 = authDAO.createAuth("Ruby");
-        GameData game = service.createGame(new createGameRequest("Game 5", auth1.authToken())).game();
+        createGameResult game = service.createGame(new createGameRequest("Game 5", auth1.authToken()));
         service.joinGame(new joinGameRequest(game.gameID(), WHITE, auth1));
         assertThrows(UnavailableException.class, () -> service.joinGame(new joinGameRequest(game.gameID(), WHITE, auth2)));
     }
@@ -93,9 +94,9 @@ public class GameServiceTest {
     @Test
     void leaveGame() throws DataAccessException, InvalidAuthTokenException, UnavailableException {
         AuthData auth1 = authDAO.createAuth("Harry");
-        GameData game = service.createGame(new createGameRequest("Game 6", auth1.authToken())).game();
-        service.joinGame(new joinGameRequest(game.gameID(), WHITE, auth1));
-        game = service.listGames(new listGamesRequest(auth1.authToken())).games().getFirst();
+        createGameResult result = service.createGame(new createGameRequest("Game 6", auth1.authToken()));
+        service.joinGame(new joinGameRequest(result.gameID(), WHITE, auth1));
+        GameData game = service.listGames(new listGamesRequest(auth1.authToken())).games().getFirst();
         assert(game.whiteUsername().equals("Harry"));
         service.leaveGame(new joinGameRequest(game.gameID(), WHITE, auth1));
         game = service.listGames(new listGamesRequest(auth1.authToken())).games().getFirst();
@@ -106,7 +107,7 @@ public class GameServiceTest {
     @Test
     void leaveGameNotIn() throws DataAccessException, InvalidAuthTokenException {
         AuthData auth = authDAO.createAuth("Gary");
-        GameData game = service.createGame(new createGameRequest("Game 7", auth.authToken())).game();
+        createGameResult game = service.createGame(new createGameRequest("Game 7", auth.authToken()));
         assertThrows(UnavailableException.class, () -> service.leaveGame(new joinGameRequest(game.gameID(), WHITE, auth)));
     }
 
