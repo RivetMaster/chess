@@ -3,13 +3,8 @@ package service;
 import dataaccess.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.exceptions.InvalidAuthTokenException;
-import service.exceptions.InvalidLogInException;
-import service.exceptions.UnavailableException;
-import service.resultsandrequests.LogInRequest;
-import service.resultsandrequests.LogOutRequest;
-import service.resultsandrequests.RegisterUserRequest;
-import service.resultsandrequests.RegisterUserResult;
+import service.exceptions.*;
+import service.resultsandrequests.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
