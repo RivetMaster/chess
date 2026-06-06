@@ -20,10 +20,15 @@ public class Server {
     private final DBService dbServ;
     private final Gson serialize;
 
-    public Server() {
-        AuthDAO authDAO = new AuthMemoryDAO();
-        GameDAO gameDAO = new GameMemoryDAO();
-        UserDAO userDAO = new UserMemoryDAO();
+    public Server(){
+        this(new AuthMemoryDAO(), new GameMemoryDAO(), new UserMemoryDAO());
+    }
+
+    public Server(UserDAO userDAO){
+        this(new AuthMemoryDAO(), new GameMemoryDAO(), userDAO);
+    }
+
+    public Server(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
         authServ = new AuthService(authDAO);
         userServ = new UserService(authDAO, userDAO);
         gameServ = new GameService(gameDAO, authDAO);

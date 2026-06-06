@@ -33,10 +33,14 @@ public class UserService {
 
     //login user if username and password match in database
     public LogInResult logIn(LogInRequest req) throws DataAccessException, InvalidLogInException {
-        UserData u = users.getUser(req.username());
-        if(u != null && u.password().equals(req.password())){
-            AuthData auth = authServ.addAuth(req.username());
-            return new LogInResult(req.username(), auth.authToken());
+        try{
+            UserData u = users.getUser(req.username());
+            if(u != null && u.password().equals(req.password())){
+                AuthData auth = authServ.addAuth(req.username());
+                return new LogInResult(req.username(), auth.authToken());
+            }
+        } catch(DataAccessException e){
+            throw new InvalidLogInException("Invalid Login");
         }
         throw new InvalidLogInException("Invalid Login");
     }
