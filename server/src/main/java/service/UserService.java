@@ -21,12 +21,14 @@ public class UserService {
 
     //register new user in database with login  info, and log them in.
     public RegisterUserResult register(RegisterUserRequest req) throws DataAccessException, UnavailableException, InvalidLogInException {
-        if(getUser(req.username()) != null) {
+        try{
+            getUser(req.username());
             throw new UnavailableException("Username Taken");
+        } catch(DataAccessException e){ //username doesn't exist
+            users.createUser(new UserData(req.username(), req.password(), req.email()));
+            LogInResult log = logIn(new LogInRequest(req.username(), req.password()));
+            return new RegisterUserResult(log.username(), log.authToken());
         }
-        users.createUser(new UserData(req.username(), req.password(), req.email()));
-        LogInResult log = logIn(new LogInRequest(req.username(), req.password()));
-        return new RegisterUserResult(log.username(), log.authToken());
     }
 
     //login user if username and password match in database
