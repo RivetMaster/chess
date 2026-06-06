@@ -46,11 +46,12 @@ public class UserSQLDAO implements UserDAO{
 
     @Override
     public int getNumUsers() throws DataAccessException {
-        int num = 0;
+        int num;
         var statement = "SELECT COUNT(0) from Users";
         try (Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
+                    rs.next();
                     num = rs.getInt(1);
                 }
             }
@@ -76,9 +77,9 @@ public class UserSQLDAO implements UserDAO{
 
     private final String[] createStatements = {"""
             CREATE TABLE IF NOT EXISTS `chess`.`Users` (
-              `username` VARCHAR(45) NOT NULL,
-              `password` VARCHAR(45) NOT NULL,
-              `email` VARCHAR(45) NOT NULL,
+              `username` VARCHAR(256) NOT NULL,
+              `password` VARCHAR(256) NOT NULL,
+              `email` VARCHAR(256) NOT NULL,
               PRIMARY KEY (`username`),
               UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
             """};
