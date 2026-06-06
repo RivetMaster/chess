@@ -27,6 +27,7 @@ public class UserSQLDAO implements UserDAO{
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
+                    rs.next();
                     user = rs.getString(1);
                     pass = rs.getString(2);
                     email = rs.getString(3);

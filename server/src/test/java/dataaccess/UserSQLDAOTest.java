@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mindrot.jbcrypt.BCrypt;
 import service.exceptions.*;
 import service.resultsandrequests.*;
 
@@ -24,7 +25,7 @@ public class UserSQLDAOTest{
         return db;
     }
 
-    //positive test for create user
+    //positive test for create user and for getNumUsers
     @ParameterizedTest
     @ValueSource(classes = {UserSQLDAO.class, UserMemoryDAO.class})
     void addUser(Class<? extends UserDAO> dao) throws DataAccessException {
@@ -66,6 +67,31 @@ public class UserSQLDAOTest{
         UserDAO userDAO = getDataAccess(dao);
 
         assertThrows(DataAccessException.class, () -> userDAO.getUser("Pam"));
+    }
+
+    //positive test for getUser
+    @ParameterizedTest
+    @ValueSource(classes = {UserSQLDAO.class, UserMemoryDAO.class})
+    void getUsers(Class<? extends UserDAO> dao) throws DataAccessException {
+        UserDAO userDAO = getDataAccess(dao);
+
+        UserData user1 = new UserData("Sue", "password2", "hick@gmail");
+        UserData user2 = new UserData("Lee", "moneymaker", "purple@verizon");
+        userDAO.createUser(user1);
+        userDAO.createUser(user2);
+        assert(userDAO.getNumUsers() == 2);
+        UserData user3 = userDAO.getUser("Sue");
+        UserData user4 = userDAO.getUser("Lee");
+        if(dao.equals(UserSQLDAO.class)) {
+            assert(user1.username().equals(user3.username()) && user1.email().equals(user3.email()) &&
+                    BCrypt.checkpw(user1.password(), user3.password()));
+            assert(user2.username().equals(user4.username()) && user2.email().equals(user4.email()) &&
+                    BCrypt.checkpw(user2.password(), user4.password()));
+        } else{
+            assert(user1.equals(user3));
+            assert(user2.equals(user4));
+        }
+
     }
 
 }
