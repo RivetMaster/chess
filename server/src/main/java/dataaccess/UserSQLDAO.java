@@ -1,0 +1,98 @@
+package dataaccess;
+
+import java.sql.Connection;
+import model.*;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.sql.*;
+
+public class UserSQLDAO implements UserDAO{
+
+    public UserSQLDAO() throws DataAccessException {
+        configureDatabase();
+    }
+
+    @Override
+    public void createUser(UserData user) throws DataAccessException {
+        var statement = "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)";
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        executeUpdate(statement, user.username(), hashedPassword, user.email());
+    }
+
+    @Override
+    public UserData getUser(String username) throws DataAccessException {
+        var statement = "SELECT * FROM Users WHERE username=?";
+        String user, pass, email;
+        try(Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, username);
+                try (ResultSet rs = ps.executeQuery()) {
+                    user = rs.getString(1);
+                    pass = rs.getString(2);
+                    email = rs.getString(3);
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to get user: %s", e.getMessage()));
+        }
+        return new UserData(user, pass, email);
+    }
+
+    @Override
+    public void clearUsers() throws DataAccessException {
+        var statement = "TRUNCATE Users";
+        executeUpdate(statement);
+    }
+
+    @Override
+    public int getNumUsers() throws DataAccessException {
+        int num = 0;
+        var statement = "SELECT COUNT(0) from Users";
+        try (Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    num = rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to count users: %s", e.getMessage()));
+        }
+        return num;
+    }
+
+    private void executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                for (int i = 0; i < params.length; i++) {
+                    Object param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                }
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
+    }
+
+    private final String[] createStatements = {"""
+            CREATE TABLE IF NOT EXISTS `chess`.`Users` (
+              `username` VARCHAR(45) NOT NULL,
+              `password` VARCHAR(45) NOT NULL,
+              `email` VARCHAR(45) NOT NULL,
+              PRIMARY KEY (`username`),
+              UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
+            """};
+
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
+}
