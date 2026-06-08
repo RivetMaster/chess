@@ -28,7 +28,7 @@ public class UserService {
             throw new UnavailableException("Username Taken");
         } catch(DataAccessException e){ //username doesn't exist
             users.createUser(new UserData(req.username(), req.password(), req.email()));
-            LogInResult log = logIn(new LogInRequest(req.username(), req.password()));
+            LogInResult log = logIn(new LogInRequest(req.username(), req.password(), req.sql()));
             return new RegisterUserResult(log.username(), log.authToken());
         }
     }

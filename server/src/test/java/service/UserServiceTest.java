@@ -1,77 +1,149 @@
 package service;
 
 import dataaccess.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import model.UserData;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mindrot.jbcrypt.BCrypt;
 import service.exceptions.*;
 import service.resultsandrequests.*;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
-    static final AuthDAO AUTH_DAO = new AuthMemoryDAO();
-    static final UserDAO USER_DAO = new UserMemoryDAO();
-    static final UserService SERVICE = new UserService(AUTH_DAO, USER_DAO);
 
-    @BeforeEach
-    void clearGames() throws DataAccessException{
-        SERVICE.clearUsers();
-        AUTH_DAO.clearAuth();
+    private UserDAO userGetDataAccess(Class<? extends UserDAO> databaseClass) throws DataAccessException {
+        UserDAO db;
+        if (databaseClass.equals(UserSQLDAO.class)) {
+            db = new UserSQLDAO();
+        } else {
+            db = new UserMemoryDAO();
+        }
+        db.clearUsers(); //before each clear
+        return db;
+    }
+
+    private AuthDAO authGetDataAccess(Class<? extends AuthDAO> databaseClass) throws DataAccessException {
+        AuthDAO db;
+        if (databaseClass.equals(AuthSQLDAO.class)) {
+            db = new AuthSQLDAO();
+        } else {
+            db = new AuthMemoryDAO();
+        }
+        db.clearAuth(); //before each clear
+        return db;
+    }
+
+    private static Stream<Arguments> provideClasses() {
+        return Stream.of(
+                Arguments.of(AuthMemoryDAO.class, UserMemoryDAO.class, false),
+                Arguments.of(AuthSQLDAO.class, UserMemoryDAO.class, false),
+                Arguments.of(AuthMemoryDAO.class, UserSQLDAO.class, true),
+                Arguments.of(AuthSQLDAO.class, UserSQLDAO.class, true)
+        );
     }
 
     //log out invalid negative test
-    @Test
-    void logOutNotIn()  {
+    @ParameterizedTest
+    @MethodSource("provideClasses")
+    void logOutNotIn(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao) throws DataAccessException {
+        AuthDAO authDAO = authGetDataAccess(adao);
+        UserDAO userDAO = userGetDataAccess(udao);
+        UserService service = new UserService(authDAO, userDAO);
+
         assertThrows(InvalidAuthTokenException.class, () ->
-                SERVICE.logOut(new LogOutRequest("Tim")));
+                service.logOut(new LogOutRequest("Tim")));
     }
 
     //log in invalid negative test
-    @Test
-    void logInNotRegistered () {
+    @ParameterizedTest
+    @MethodSource("provideClasses")
+    void logInNotRegistered (Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao, boolean sql) throws DataAccessException {
+        AuthDAO authDAO = authGetDataAccess(adao);
+        UserDAO userDAO = userGetDataAccess(udao);
+        UserService service = new UserService(authDAO, userDAO);
+
         assertThrows(InvalidLogInException.class, () ->
-                SERVICE.logIn(new LogInRequest("Betty", "1234")));
+                service.logIn(new LogInRequest("Betty", "1234", sql)));
     }
 
     //register same username twice fail, negative test
-    @Test
-    void registerSameNameTwice() throws UnavailableException, DataAccessException, InvalidLogInException {
-        SERVICE.register(new RegisterUserRequest("Ann", "5678", "hit@gmail.com"));
+    @ParameterizedTest
+    @MethodSource("provideClasses")
+    void registerSameNameTwice(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao, boolean sql)
+            throws UnavailableException, DataAccessException, InvalidLogInException {
+        AuthDAO authDAO = authGetDataAccess(adao);
+        UserDAO userDAO = userGetDataAccess(udao);
+        UserService service = new UserService(authDAO, userDAO);
+
+        service.register(new RegisterUserRequest("Ann", "5678", "hit@gmail.com", sql));
         assertThrows(UnavailableException.class, () ->
-                SERVICE.register(new RegisterUserRequest("Ann", "1234", "hi@gmail.com")));
+                service.register(new RegisterUserRequest("Ann", "1234", "hi@gmail.com", sql)));
     }
 
     //register user, positive test
-    @Test
-    void registerUser() throws UnavailableException, DataAccessException, InvalidLogInException {
-        RegisterUserRequest userInfo = new RegisterUserRequest("Isaac", "password", "hi@gmail.com");
-        SERVICE.register(userInfo);
-        assert(SERVICE.getNumUsers() == 1);
-        assert(SERVICE.getUser("Isaac").equals(userInfo.toUserData()));
+    @ParameterizedTest
+    @MethodSource("provideClasses")
+    void registerUser(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao, boolean sql)
+            throws UnavailableException, DataAccessException, InvalidLogInException {
+        AuthDAO authDAO = authGetDataAccess(adao);
+        UserDAO userDAO = userGetDataAccess(udao);
+        UserService service = new UserService(authDAO, userDAO);
+
+        RegisterUserRequest userInfo = new RegisterUserRequest("Isaac", "password", "hi@gmail.com", sql);
+        service.register(userInfo);
+        assert(service.getNumUsers() == 1);
+        UserData userOriginal = userInfo.toUserData();
+        UserData userStored = service.getUser("Isaac");
+        if(sql) {
+            assert (userOriginal.username().equals(userStored.username()) &&
+                    userOriginal.email().equals(userStored.email()) &&
+                    BCrypt.checkpw(userOriginal.password(), userStored.password()));
+        } else {
+            assert(userOriginal.equals(userStored));
+        }
     }
 
     //clear users, positive test
-    @Test
-    void clearUsers() throws UnavailableException, DataAccessException, InvalidLogInException {
-        RegisterUserRequest userInfo = new RegisterUserRequest("Isaac", "password", "hi@gmail.com");
-        RegisterUserRequest userInfo2 = new RegisterUserRequest("Isaiah", "password", "hi@gmail.com");
-        SERVICE.register(userInfo);
-        SERVICE.register(userInfo2);
-        assert(SERVICE.getNumUsers() == 2);
-        SERVICE.clearUsers();
-        assert(SERVICE.getNumUsers() == 0);
+    @ParameterizedTest
+    @MethodSource("provideClasses")
+    void clearUsers(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao, boolean sql)
+            throws UnavailableException, DataAccessException, InvalidLogInException {
+        AuthDAO authDAO = authGetDataAccess(adao);
+        UserDAO userDAO = userGetDataAccess(udao);
+        UserService service = new UserService(authDAO, userDAO);
+
+        RegisterUserRequest userInfo = new RegisterUserRequest("Isaac", "password", "hi@gmail.com", sql);
+        RegisterUserRequest userInfo2 = new RegisterUserRequest("Isaiah", "password", "hi@gmail.com", sql);
+        service.register(userInfo);
+        service.register(userInfo2);
+
+        assert(service.getNumUsers() == 2);
+
+        service.clearUsers();
+
+        assert(service.getNumUsers() == 0);
     }
 
     //log in and log out user positive test
-    @Test
-    void logInAndOut() throws UnavailableException, DataAccessException, InvalidAuthTokenException, InvalidLogInException {
-        AuthService authServ = new AuthService(AUTH_DAO);
-        RegisterUserRequest userInfo = new RegisterUserRequest("Bethany", "password", "hi@gmail.com");
-        RegisterUserResult auth = SERVICE.register(userInfo);
-        assert(SERVICE.getNumUsers() == 1);
+    @ParameterizedTest
+    @MethodSource("provideClasses")
+    void logInAndOut(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao, boolean sql)
+            throws UnavailableException, DataAccessException, InvalidAuthTokenException, InvalidLogInException {
+        AuthDAO authDAO = authGetDataAccess(adao);
+        UserDAO userDAO = userGetDataAccess(udao);
+        UserService service = new UserService(authDAO, userDAO);
+
+        AuthService authServ = new AuthService(authDAO);
+        RegisterUserRequest userInfo = new RegisterUserRequest("Bethany", "password", "hi@gmail.com", sql);
+        RegisterUserResult auth = service.register(userInfo);
+        assert(service.getNumUsers() == 1);
         assert(authServ.verifyAuth(auth.authToken()));
-        SERVICE.logOut(new LogOutRequest(auth.authToken()));
-        assert(SERVICE.getNumUsers() == 1);
+        service.logOut(new LogOutRequest(auth.authToken()));
+        assert(service.getNumUsers() == 1);
         assertThrows(InvalidAuthTokenException.class, () -> authServ.verifyAuth(auth.authToken()));
     }
 }

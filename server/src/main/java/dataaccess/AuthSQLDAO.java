@@ -91,12 +91,12 @@ public class AuthSQLDAO implements AuthDAO{
     }
 
     private final String[] createStatements = {"""
-            CREATE TABLE IF NOT EXISTS `chess`.`Auths` (
-              `username` VARCHAR(256) NOT NULL,
-              `authToken` VARCHAR(256) NOT NULL,
-              PRIMARY KEY (`username`, `authToken`),
-              UNIQUE INDEX `authToken_UNIQUE` (`authToken` ASC) VISIBLE,
-              UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
+            CREATE TABLE IF NOT EXISTS `Auths` (
+            `username` varchar(256) NOT NULL,
+            `authToken` varchar(256) NOT NULL,
+            PRIMARY KEY (`username`,`authToken`),
+            UNIQUE KEY `authToken_UNIQUE` (`authToken`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """};
 
     private void configureDatabase() throws DataAccessException {

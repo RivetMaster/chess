@@ -125,6 +125,7 @@ public class Server {
     private void register(Context ctx) throws UnavailableException, DataAccessException, InvalidRequestException, InvalidLogInException {
         //should be given user, password, and email
         RegisterUserRequest req = serialize.fromJson(ctx.body(), RegisterUserRequest.class);
+        req = new RegisterUserRequest(req.username(), req.password(), req.email(), SQL);
         if(!req.existingFields()){
             //invalid request if missing field or just whitespace
             throw new InvalidRequestException("Expecting username, password, and email.");
