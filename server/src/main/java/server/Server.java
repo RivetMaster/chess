@@ -5,7 +5,6 @@ import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
-import org.mindrot.jbcrypt.BCrypt;
 import service.*;
 import service.exceptions.*;
 import service.resultsandrequests.*;
