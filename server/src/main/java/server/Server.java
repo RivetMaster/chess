@@ -20,15 +20,17 @@ public class Server {
     private final DBService dbServ;
     private final Gson serialize;
 
-    public Server(){
-        this(new AuthMemoryDAO(), new GameMemoryDAO(), new UserMemoryDAO());
-    }
-
-    public Server(UserDAO userDAO, AuthDAO authDAO){
-        this(authDAO, new GameMemoryDAO(), userDAO);
-    }
-
-    public Server(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
+    public Server() {
+        AuthDAO authDAO = new AuthMemoryDAO();
+        UserDAO userDAO = new UserMemoryDAO();
+        GameDAO gameDAO = new GameMemoryDAO();
+        try {
+            authDAO = new AuthSQLDAO();
+            //userDAO = new UserSQLDAO();
+            //gameDAO = new GameSQLDAO();
+        } catch (Throwable ex) {
+            System.out.printf("Unable to start server: %s%n", ex.getMessage());
+        }
         authServ = new AuthService(authDAO);
         userServ = new UserService(authDAO, userDAO);
         gameServ = new GameService(gameDAO, authDAO);
