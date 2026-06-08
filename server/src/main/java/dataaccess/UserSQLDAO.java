@@ -77,7 +77,7 @@ public class UserSQLDAO implements UserDAO{
     }
 
     private final String[] createStatements = {"""
-            CREATE TABLE IF NOT EXISTS `chess`.`Users` (
+            CREATE TABLE IF NOT EXISTS `Users` (
               `username` VARCHAR(256) NOT NULL,
               `password` VARCHAR(256) NOT NULL,
               `email` VARCHAR(256) NOT NULL,
