@@ -4,6 +4,7 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 import server.InvalidRequestException;
 import service.exceptions.*;
 import service.resultsandrequests.*;
@@ -36,7 +37,8 @@ public class UserService {
     public LogInResult logIn(LogInRequest req) throws DataAccessException, InvalidLogInException {
         try{
             UserData u = users.getUser(req.username());
-            if(u != null && u.password().equals(req.password())){
+            if(u != null && (!req.sql() && u.password().equals(req.password()) ||
+                             (req.sql() && BCrypt.checkpw(req.password(), u.password())) ) ){
                 AuthData auth = authServ.addAuth(req.username());
                 return new LogInResult(req.username(), auth.authToken());
             }

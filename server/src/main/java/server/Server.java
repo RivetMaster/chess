@@ -5,6 +5,7 @@ import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
+import org.mindrot.jbcrypt.BCrypt;
 import service.*;
 import service.exceptions.*;
 import service.resultsandrequests.*;
@@ -19,6 +20,7 @@ public class Server {
     private final GameService gameServ;
     private final DBService dbServ;
     private final Gson serialize;
+    private final boolean SQL = true;
 
     public Server() {
         AuthDAO authDAO = new AuthMemoryDAO();
@@ -26,7 +28,7 @@ public class Server {
         GameDAO gameDAO = new GameMemoryDAO();
         try {
             authDAO = new AuthSQLDAO();
-            //userDAO = new UserSQLDAO();
+            userDAO = new UserSQLDAO();
             //gameDAO = new GameSQLDAO();
         } catch (Throwable ex) {
             System.out.printf("Unable to start server: %s%n", ex.getMessage());
@@ -112,6 +114,7 @@ public class Server {
     private void logIn(Context ctx) throws InvalidRequestException, DataAccessException, InvalidLogInException {
         //Logs in an existing user (takes in user, password), (returns a new authToken)
         LogInRequest req = serialize.fromJson(ctx.body(), LogInRequest.class);
+        req = new LogInRequest(req.username(), req.password(), SQL);
         if(!req.existingFields()){
             //invalid request if missing fields or just whitespace
             throw new InvalidRequestException("Expecting username and password.");
