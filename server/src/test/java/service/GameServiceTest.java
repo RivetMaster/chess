@@ -37,7 +37,7 @@ public class GameServiceTest {
     //test creating one game
     //positive test for createGame, and listGames
     @Test
-    void createGame() throws DataAccessException, InvalidAuthTokenException {
+    void createGame() throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthData auth = AUTH_DAO.createAuth("June");
         SERVICE.createGame(new CreateGameRequest("Game 1", auth.authToken()));
         ArrayList<GameData> games = SERVICE.listGames(new ListGamesRequest(auth.authToken())).games();
@@ -47,7 +47,7 @@ public class GameServiceTest {
 
     //test clears games positive
     @Test
-    void clear() throws DataAccessException, InvalidAuthTokenException {
+    void clear() throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthData auth = AUTH_DAO.createAuth("July");
         SERVICE.createGame(new CreateGameRequest("game 2", auth.authToken()));
         SERVICE.clearGames();
@@ -57,7 +57,7 @@ public class GameServiceTest {
     //test throws error when creating game without authorization
     //create game negative
     @Test
-    void createGameUnauthorized() throws DataAccessException, InvalidAuthTokenException{
+    void createGameUnauthorized() throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         assertThrows(InvalidAuthTokenException.class, () -> SERVICE.createGame(new CreateGameRequest("game 3", "token")));
         AuthData auth = AUTH_DAO.createAuth("Mary");
         assert(SERVICE.listGames(new ListGamesRequest(auth.authToken())).games().isEmpty());
@@ -106,7 +106,7 @@ public class GameServiceTest {
 
     //negative test for leaveGame
     @Test
-    void leaveGameNotIn() throws DataAccessException, InvalidAuthTokenException {
+    void leaveGameNotIn() throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthData auth = AUTH_DAO.createAuth("Gary");
         CreateGameResult game = SERVICE.createGame(new CreateGameRequest("Game 7", auth.authToken()));
         assertThrows(InvalidRequestException.class, () -> SERVICE.leaveGame(new JoinGameRequest(game.gameID(), WHITE, auth)));

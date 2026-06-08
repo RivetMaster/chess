@@ -3,6 +3,7 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
+import server.InvalidRequestException;
 import service.exceptions.InvalidAuthTokenException;
 
 public class AuthService {
@@ -13,14 +14,16 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public boolean verifyAuth(String authToken) throws InvalidAuthTokenException, DataAccessException {
-        if(authDAO.getAuth(authToken) == null){
+    public boolean verifyAuth(String authToken) throws InvalidAuthTokenException {
+        try{
+            authDAO.getAuth(authToken);
+            return true;
+        } catch(DataAccessException e){
             throw new InvalidAuthTokenException("Unauthorized");
         }
-        return true;
     }
 
-    public AuthData addAuth(String username) throws DataAccessException{
+    public AuthData addAuth(String username) throws DataAccessException, InvalidRequestException {
         return authDAO.createAuth(username);
     }
 

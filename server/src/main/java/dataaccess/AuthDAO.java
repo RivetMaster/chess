@@ -1,13 +1,14 @@
 package dataaccess;
 
 import model.AuthData;
+import server.InvalidRequestException;
 import service.exceptions.InvalidAuthTokenException;
 
 import java.util.UUID;
 
 public interface AuthDAO{
     //Create a new authorization.
-    AuthData createAuth(String username) throws DataAccessException;
+    AuthData createAuth(String username) throws DataAccessException, InvalidRequestException;
     //Retrieve an authorization given an authToken.
     AuthData getAuth(String authToken) throws DataAccessException;
     //Delete an authorization so that it is no longer valid.
@@ -18,4 +19,6 @@ public interface AuthDAO{
     static String generateAuthToken(){
         return UUID.randomUUID().toString();
     }
+    //return number of authorizations
+    int numAuths() throws DataAccessException;
 }

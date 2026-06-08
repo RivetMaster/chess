@@ -7,6 +7,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.InvalidRequestException;
 import service.exceptions.InvalidAuthTokenException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +23,7 @@ public class AuthServiceTest {
     //test correctly adds authtoken and verifies correctly
     //positive test for addAuth and verify auth
     @Test
-    void addAuth() throws InvalidAuthTokenException, DataAccessException{
+    void addAuth() throws InvalidAuthTokenException, DataAccessException, InvalidRequestException {
         AuthData auth1 = SERVICE.addAuth("Tim");
         assert(SERVICE.verifyAuth(auth1.authToken()));
     }
@@ -30,7 +31,7 @@ public class AuthServiceTest {
     //test correctly adds and verifies multiple authorizations, username doesn't cause issues
     //positive test for addAuth and verify Auth
     @Test
-    void addAuths() throws InvalidAuthTokenException, DataAccessException{
+    void addAuths() throws InvalidAuthTokenException, DataAccessException, InvalidRequestException {
         AuthData auth1 = SERVICE.addAuth("Tim");
         AuthData auth2 = SERVICE.addAuth("Jen");
         AuthData auth3 = SERVICE.addAuth("Tim");
@@ -51,10 +52,16 @@ public class AuthServiceTest {
         assertThrows(InvalidAuthTokenException.class, () -> SERVICE.verifyAuth(auth));
     }
 
+    //negative test for addAuth
+    @Test
+    void addAuthNull() {
+        assertThrows(InvalidRequestException.class, () -> SERVICE.addAuth(null));
+    }
+
     //verifies clearAuths works, authorizations don't stay past
     //positive test for clearAuths
     @Test
-    void clearAuths() throws  DataAccessException{
+    void clearAuths() throws DataAccessException, InvalidRequestException {
         AuthData auth1 = SERVICE.addAuth("Tim");
         AuthData auth2 = SERVICE.addAuth("Jen");
         AuthData auth3 = SERVICE.addAuth("Tim");
@@ -71,7 +78,7 @@ public class AuthServiceTest {
     //test delete authData throws error, leaves other authorizations alone
     //positive test for delAuth
     @Test
-    void deleteAuth() throws DataAccessException, InvalidAuthTokenException{
+    void deleteAuth() throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthData auth1 = SERVICE.addAuth("Ham");
         AuthData auth2 = SERVICE.addAuth("Cheese");
 
@@ -84,7 +91,7 @@ public class AuthServiceTest {
     //test deleting non-existent authData throws error
     //negative test for delAuth
     @Test
-    void deleteNonAuth() throws DataAccessException, InvalidAuthTokenException{
+    void deleteNonAuth() throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthData auth1 = SERVICE.addAuth("Jim");
         AuthData auth2 = new AuthData(AuthDAO.generateAuthToken(), "Mary");
 

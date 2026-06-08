@@ -1,6 +1,7 @@
 package server;
 
 import chess.*;
+import dataaccess.AuthSQLDAO;
 import dataaccess.UserSQLDAO;
 
 public class ServerMain {
@@ -13,9 +14,10 @@ public class ServerMain {
                 port = Integer.parseInt(args[0]);
             }
 
-            UserSQLDAO dataAccess = new UserSQLDAO();
+            UserSQLDAO userDAO = new UserSQLDAO();
+            AuthSQLDAO authDAO = new AuthSQLDAO();
 
-            Server server = new Server(dataAccess);
+            Server server = new Server(userDAO, authDAO);
             server.run(port);
             return;
         } catch (Throwable ex) {

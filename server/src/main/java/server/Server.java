@@ -24,8 +24,8 @@ public class Server {
         this(new AuthMemoryDAO(), new GameMemoryDAO(), new UserMemoryDAO());
     }
 
-    public Server(UserDAO userDAO){
-        this(new AuthMemoryDAO(), new GameMemoryDAO(), userDAO);
+    public Server(UserDAO userDAO, AuthDAO authDAO){
+        this(authDAO, new GameMemoryDAO(), userDAO);
     }
 
     public Server(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {

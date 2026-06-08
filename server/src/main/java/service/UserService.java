@@ -4,6 +4,7 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.*;
+import server.InvalidRequestException;
 import service.exceptions.*;
 import service.resultsandrequests.*;
 
@@ -39,7 +40,7 @@ public class UserService {
                 AuthData auth = authServ.addAuth(req.username());
                 return new LogInResult(req.username(), auth.authToken());
             }
-        } catch(DataAccessException e){
+        } catch(DataAccessException | InvalidRequestException e){
             throw new InvalidLogInException("Invalid Login");
         }
         throw new InvalidLogInException("Invalid Login");
