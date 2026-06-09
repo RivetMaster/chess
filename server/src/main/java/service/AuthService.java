@@ -14,11 +14,11 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public boolean verifyAuth(String authToken) throws InvalidAuthTokenException {
+    public boolean verifyAuth(String authToken) throws InvalidAuthTokenException, DataAccessException {
         try{
             authDAO.getAuth(authToken);
             return true;
-        } catch(DataAccessException e){
+        } catch(InvalidAuthTokenException e){
             throw new InvalidAuthTokenException("Unauthorized");
         }
     }

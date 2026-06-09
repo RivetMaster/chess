@@ -49,13 +49,13 @@ public class AuthSQLDAOTest {
     void getAuthNotExist(Class<? extends AuthDAO> dao) throws DataAccessException {
         AuthDAO authDAO = getDataAccess(dao);
 
-        assertThrows(DataAccessException.class, () -> authDAO.getAuth("Bob"));
+        assertThrows(InvalidAuthTokenException.class, () -> authDAO.getAuth("Bob"));
     }
 
     //positive test for getAuth
     @ParameterizedTest
     @ValueSource(classes = {AuthSQLDAO.class, AuthMemoryDAO.class})
-    void getAuth(Class<? extends AuthDAO> dao) throws DataAccessException, InvalidRequestException {
+    void getAuth(Class<? extends AuthDAO> dao) throws DataAccessException, InvalidRequestException, InvalidAuthTokenException {
         AuthDAO authDAO = getDataAccess(dao);
 
         AuthData auth1 = authDAO.createAuth("ollie");
@@ -89,7 +89,7 @@ public class AuthSQLDAOTest {
         assert(authDAO.numAuths() == 1);
         assert(authDAO.getAuth(auth1.authToken()).equals(auth1));
         authDAO.deleteAuth(auth1.authToken());
-        assertThrows(DataAccessException.class, () -> authDAO.getAuth(auth1.authToken()));
+        assertThrows(InvalidAuthTokenException.class, () -> authDAO.getAuth(auth1.authToken()));
         assert(authDAO.numAuths() == 0);
     }
 

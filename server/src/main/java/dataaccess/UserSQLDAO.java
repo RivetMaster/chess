@@ -3,6 +3,7 @@ package dataaccess;
 import java.sql.Connection;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
+import server.InvalidRequestException;
 
 import java.sql.*;
 
@@ -13,27 +14,33 @@ public class UserSQLDAO implements UserDAO{
     }
 
     @Override
-    public void createUser(UserData user) throws DataAccessException {
+    public void createUser(UserData user) throws DataAccessException, InvalidRequestException {
+        if(!user.verifyFields()){
+            throw new InvalidRequestException("Expecting username, password, email");
+        }
         var statement = "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         executeUpdate(statement, user.username(), hashedPassword, user.email());
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) throws DataAccessException, InvalidRequestException {
         var statement = "SELECT * FROM Users WHERE username=?";
         String user, pass, email;
         try(Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
-                    rs.next();
-                    user = rs.getString(1);
-                    pass = rs.getString(2);
-                    email = rs.getString(3);
+                    if(rs.next()) {
+                        user = rs.getString(1);
+                        pass = rs.getString(2);
+                        email = rs.getString(3);
+                    } else{
+                        throw new InvalidRequestException("User Does Not Exist");
+                    }
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new DataAccessException(String.format("Unable to get user: %s", e.getMessage()));
         }
         return new UserData(user, pass, email);

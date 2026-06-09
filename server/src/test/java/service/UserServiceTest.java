@@ -5,7 +5,7 @@ import model.UserData;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mindrot.jbcrypt.BCrypt;
+import server.InvalidRequestException;
 import service.exceptions.*;
 import service.resultsandrequests.*;
 
@@ -74,7 +74,7 @@ public class UserServiceTest {
     @ParameterizedTest
     @MethodSource("provideClasses")
     void registerSameNameTwice(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
-            throws UnavailableException, DataAccessException, InvalidLogInException {
+            throws UnavailableException, DataAccessException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         UserDAO userDAO = userGetDataAccess(udao);
         UserService service = new UserService(authDAO, userDAO);
@@ -88,7 +88,7 @@ public class UserServiceTest {
     @ParameterizedTest
     @MethodSource("provideClasses")
     void registerUser(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
-            throws UnavailableException, DataAccessException, InvalidLogInException {
+            throws UnavailableException, DataAccessException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         UserDAO userDAO = userGetDataAccess(udao);
         UserService service = new UserService(authDAO, userDAO);
@@ -107,7 +107,7 @@ public class UserServiceTest {
     @ParameterizedTest
     @MethodSource("provideClasses")
     void clearUsers(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
-            throws UnavailableException, DataAccessException, InvalidLogInException {
+            throws UnavailableException, DataAccessException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         UserDAO userDAO = userGetDataAccess(udao);
         UserService service = new UserService(authDAO, userDAO);
@@ -128,7 +128,7 @@ public class UserServiceTest {
     @ParameterizedTest
     @MethodSource("provideClasses")
     void logInAndOut(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
-            throws UnavailableException, DataAccessException, InvalidAuthTokenException, InvalidLogInException {
+            throws UnavailableException, DataAccessException, InvalidAuthTokenException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         UserDAO userDAO = userGetDataAccess(udao);
         UserService service = new UserService(authDAO, userDAO);

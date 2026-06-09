@@ -10,7 +10,7 @@ public interface AuthDAO{
     //Create a new authorization.
     AuthData createAuth(String username) throws DataAccessException, InvalidRequestException;
     //Retrieve an authorization given an authToken.
-    AuthData getAuth(String authToken) throws DataAccessException;
+    AuthData getAuth(String authToken) throws DataAccessException, InvalidAuthTokenException;
     //Delete an authorization so that it is no longer valid.
     void deleteAuth(String authToken) throws DataAccessException, InvalidAuthTokenException;
     //delete all authorizations

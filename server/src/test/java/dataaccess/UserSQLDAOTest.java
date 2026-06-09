@@ -4,6 +4,7 @@ import model.UserData;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mindrot.jbcrypt.BCrypt;
+import server.InvalidRequestException;
 import service.exceptions.*;
 import service.resultsandrequests.*;
 
@@ -25,7 +26,7 @@ public class UserSQLDAOTest{
     //positive test for create user and for getNumUsers
     @ParameterizedTest
     @ValueSource(classes = {UserSQLDAO.class, UserMemoryDAO.class})
-    void addUser(Class<? extends UserDAO> dao) throws DataAccessException {
+    void addUser(Class<? extends UserDAO> dao) throws DataAccessException, InvalidRequestException {
         UserDAO userDAO = getDataAccess(dao);
 
         userDAO.createUser(new UserData("Mary", "password", "hi@gmail"));
@@ -37,7 +38,7 @@ public class UserSQLDAOTest{
     //positive test for clear users
     @ParameterizedTest
     @ValueSource(classes = {UserSQLDAO.class, UserMemoryDAO.class})
-    void clearUsers(Class<? extends UserDAO> dao) throws DataAccessException {
+    void clearUsers(Class<? extends UserDAO> dao) throws DataAccessException, InvalidRequestException {
         UserDAO userDAO = getDataAccess(dao);
 
         userDAO.createUser(new UserData("Mary", "password", "hi@gmail"));
@@ -54,7 +55,7 @@ public class UserSQLDAOTest{
     void addUserNull(Class<? extends UserDAO> dao) throws DataAccessException {
         UserDAO userDAO = getDataAccess(dao);
 
-        assertThrows(DataAccessException.class, () -> userDAO.createUser(new UserData("Mary", "password", null)));
+        assertThrows(InvalidRequestException.class, () -> userDAO.createUser(new UserData("Mary", "password", null)));
     }
 
     //negative test for getUser
@@ -63,13 +64,13 @@ public class UserSQLDAOTest{
     void getUserDoesntExist(Class<? extends UserDAO> dao) throws DataAccessException {
         UserDAO userDAO = getDataAccess(dao);
 
-        assertThrows(DataAccessException.class, () -> userDAO.getUser("Pam"));
+        assertThrows(InvalidRequestException.class, () -> userDAO.getUser("Pam"));
     }
 
     //positive test for getUser
     @ParameterizedTest
     @ValueSource(classes = {UserSQLDAO.class, UserMemoryDAO.class})
-    void getUsers(Class<? extends UserDAO> dao) throws DataAccessException {
+    void getUsers(Class<? extends UserDAO> dao) throws DataAccessException, InvalidRequestException {
         UserDAO userDAO = getDataAccess(dao);
 
         UserData user1 = new UserData("Sue", "password2", "hick@gmail");

@@ -24,19 +24,22 @@ public class AuthSQLDAO implements AuthDAO{
     }
 
     @Override
-    public AuthData getAuth(String authToken) throws DataAccessException {
+    public AuthData getAuth(String authToken) throws DataAccessException, InvalidAuthTokenException {
         var statement = "SELECT * FROM Auths WHERE authToken=?";
         String user, auth;
         try(Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, authToken);
                 try (ResultSet rs = ps.executeQuery()) {
-                    rs.next();
-                    user = rs.getString(1);
-                    auth = rs.getString(2);
+                    if(rs.next()) {
+                        user = rs.getString(1);
+                        auth = rs.getString(2);
+                    } else{
+                        throw new InvalidAuthTokenException("Invalid Authentication");
+                    }
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new DataAccessException(String.format("Unable to get authentication: %s", e.getMessage()));
         }
         return new AuthData(auth, user);

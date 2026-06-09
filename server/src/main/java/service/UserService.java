@@ -4,10 +4,10 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.*;
-import org.mindrot.jbcrypt.BCrypt;
 import server.InvalidRequestException;
 import service.exceptions.*;
 import service.resultsandrequests.*;
+
 
 
 public class UserService {
@@ -22,11 +22,11 @@ public class UserService {
     }
 
     //register new user in database with login  info, and log them in.
-    public RegisterUserResult register(RegisterUserRequest req) throws DataAccessException, UnavailableException, InvalidLogInException {
+    public RegisterUserResult register(RegisterUserRequest req) throws DataAccessException, UnavailableException, InvalidLogInException, InvalidRequestException {
         try{
             getUser(req.username());
             throw new UnavailableException("Username Taken");
-        } catch(DataAccessException e){ //username doesn't exist
+        } catch(InvalidRequestException e){ //username doesn't exist
             users.createUser(new UserData(req.username(), req.password(), req.email()));
             LogInResult log = logIn(new LogInRequest(req.username(), req.password()));
             return new RegisterUserResult(log.username(), log.authToken());
@@ -36,12 +36,12 @@ public class UserService {
     //login user if username and password match in database
     public LogInResult logIn(LogInRequest req) throws DataAccessException, InvalidLogInException {
         try{
-            UserData u = users.getUser(req.username());
+            UserData u = getUser(req.username());
             if(u != null && users.pwEquals(req.password(), u.password()) ){
                 AuthData auth = authServ.addAuth(req.username());
                 return new LogInResult(req.username(), auth.authToken());
             }
-        } catch(DataAccessException | InvalidRequestException e){
+        } catch(InvalidRequestException e){
             throw new InvalidLogInException("Invalid Login");
         }
         throw new InvalidLogInException("Invalid Login");
@@ -53,7 +53,7 @@ public class UserService {
         return new VoidResult();
     }
 
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) throws DataAccessException, InvalidRequestException {
         return users.getUser(username);
     }
 

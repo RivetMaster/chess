@@ -25,13 +25,13 @@ public class AuthMemoryDAO implements AuthDAO{
     }
 
     //Retrieve an authorization given an authToken.
-    public AuthData getAuth(String authToken) throws DataAccessException{
+    public AuthData getAuth(String authToken) throws InvalidAuthTokenException {
         for(AuthData a : auths){
             if(a.authToken().equals(authToken)){
                 return a;
             }
         }
-        throw new DataAccessException("Unable to get authentication");
+        throw new InvalidAuthTokenException("Invalid authentication");
     }
 
     //Delete an authorization so that it is no longer valid.

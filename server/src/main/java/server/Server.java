@@ -27,7 +27,7 @@ public class Server {
         try {
             authDAO = new AuthSQLDAO();
             userDAO = new UserSQLDAO();
-            //gameDAO = new GameSQLDAO();
+            gameDAO = new GameSQLDAO();
         } catch (Throwable ex) {
             System.out.printf("Unable to start server: %s%n", ex.getMessage());
         }
