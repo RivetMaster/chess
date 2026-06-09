@@ -10,12 +10,21 @@ import server.InvalidRequestException;
 import java.sql.*;
 import java.util.ArrayList;
 
-import static dataaccess.QuerySQLDatabase.executeUpdate;
-import static dataaccess.QuerySQLDatabase.getCount;
+import static dataaccess.QuerySQLDatabase.*;
 
 public class GameSQLDAO implements GameDAO{
     public GameSQLDAO() throws DataAccessException {
-        configureDatabase();
+        String[] createStatements = {"""
+            CREATE TABLE IF NOT EXISTS `Games` (
+              `gameID` INT NOT NULL AUTO_INCREMENT,
+              `whiteUsername` VARCHAR(256) NULL,
+              `blackUsername` VARCHAR(256) NULL,
+              `gameName` VARCHAR(256) NULL,
+              `game` JSON NULL,
+              PRIMARY KEY (`gameID`),
+              UNIQUE INDEX `gameID_UNIQUE` (`gameID` ASC) VISIBLE);
+            """};
+        configureDatabase(createStatements);
     }
 
     @Override
@@ -108,27 +117,4 @@ public class GameSQLDAO implements GameDAO{
         executeUpdate(statement);
     }
 
-    private final String[] createStatements = {"""
-            CREATE TABLE IF NOT EXISTS `Games` (
-              `gameID` INT NOT NULL AUTO_INCREMENT,
-              `whiteUsername` VARCHAR(256) NULL,
-              `blackUsername` VARCHAR(256) NULL,
-              `gameName` VARCHAR(256) NULL,
-              `game` JSON NULL,
-              PRIMARY KEY (`gameID`),
-              UNIQUE INDEX `gameID_UNIQUE` (`gameID` ASC) VISIBLE);
-            """};
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 }

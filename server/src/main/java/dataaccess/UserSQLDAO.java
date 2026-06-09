@@ -7,13 +7,20 @@ import server.InvalidRequestException;
 
 import java.sql.*;
 
-import static dataaccess.QuerySQLDatabase.executeUpdate;
-import static dataaccess.QuerySQLDatabase.getCount;
+import static dataaccess.QuerySQLDatabase.*;
 
 public class UserSQLDAO implements UserDAO{
 
     public UserSQLDAO() throws DataAccessException {
-        configureDatabase();
+        String[] createStatements = {"""
+            CREATE TABLE IF NOT EXISTS `Users` (
+              `username` VARCHAR(256) NOT NULL,
+              `password` VARCHAR(256) NOT NULL,
+              `email` VARCHAR(256) NOT NULL,
+              PRIMARY KEY (`username`),
+              UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
+            """};
+        configureDatabase(createStatements);
     }
 
     @Override
@@ -71,25 +78,4 @@ public class UserSQLDAO implements UserDAO{
     }
 
 
-    private final String[] createStatements = {"""
-            CREATE TABLE IF NOT EXISTS `Users` (
-              `username` VARCHAR(256) NOT NULL,
-              `password` VARCHAR(256) NOT NULL,
-              `email` VARCHAR(256) NOT NULL,
-              PRIMARY KEY (`username`),
-              UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
-            """};
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 }

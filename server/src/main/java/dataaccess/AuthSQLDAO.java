@@ -7,12 +7,19 @@ import service.exceptions.InvalidAuthTokenException;
 
 import java.sql.*;
 
-import static dataaccess.QuerySQLDatabase.executeUpdate;
-import static dataaccess.QuerySQLDatabase.getCount;
+import static dataaccess.QuerySQLDatabase.*;
 
 public class AuthSQLDAO implements AuthDAO{
     public AuthSQLDAO() throws DataAccessException {
-        configureDatabase();
+        String[] createStatements = {"""
+            CREATE TABLE IF NOT EXISTS `Auths` (
+            `username` varchar(256) NOT NULL,
+            `authToken` varchar(256) NOT NULL,
+            PRIMARY KEY (`username`,`authToken`),
+            UNIQUE KEY `authToken_UNIQUE` (`authToken`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """};
+        configureDatabase(createStatements);
     }
 
     @Override
@@ -74,26 +81,5 @@ public class AuthSQLDAO implements AuthDAO{
         executeUpdate(statement);
     }
 
-    private final String[] createStatements = {"""
-            CREATE TABLE IF NOT EXISTS `Auths` (
-            `username` varchar(256) NOT NULL,
-            `authToken` varchar(256) NOT NULL,
-            PRIMARY KEY (`username`,`authToken`),
-            UNIQUE KEY `authToken_UNIQUE` (`authToken`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """};
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 
 }
