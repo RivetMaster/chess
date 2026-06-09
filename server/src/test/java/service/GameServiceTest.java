@@ -43,7 +43,7 @@ public class GameServiceTest {
         return db;
     }
 
-    private static Stream<Arguments> provideClasses() {
+    private static Stream<Arguments> provideGameClasses() {
         return Stream.of(
                 Arguments.of(AuthMemoryDAO.class, GameMemoryDAO.class),
                 Arguments.of(AuthSQLDAO.class, GameMemoryDAO.class),
@@ -55,7 +55,7 @@ public class GameServiceTest {
     //test creating one game
     //positive test for createGame, and listGames
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void createGameClass(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -71,7 +71,7 @@ public class GameServiceTest {
 
     //test clears games positive
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void clear(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -87,7 +87,7 @@ public class GameServiceTest {
     //test throws error when creating game without authorization
     //create game negative
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void createGameUnauthorized(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -102,7 +102,7 @@ public class GameServiceTest {
 
     //tests list games negative
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void listGamesUnauthorized(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -115,7 +115,7 @@ public class GameServiceTest {
 
     //positive test for joining Game
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void joinGame(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -132,7 +132,7 @@ public class GameServiceTest {
 
     //negative test for joining game
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void joinGameFull(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -149,7 +149,7 @@ public class GameServiceTest {
 
     //positive test for leaveGame
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void leaveGame(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -168,7 +168,7 @@ public class GameServiceTest {
 
     //negative test for leaveGame
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideGameClasses")
     void leaveGameNotIn(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
             throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
