@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public interface GameDAO {
     //Create a new game.
-    void createGame(GameData game) throws DataAccessException;
+    GameData createGame(GameData game) throws DataAccessException, InvalidRequestException;
     //Retrieve a specified game with the given game ID.
     GameData getGame(int gameID) throws DataAccessException, InvalidRequestException;
     //Retrieve all games.
@@ -20,6 +20,4 @@ public interface GameDAO {
     void addPlayer(int gameID, ChessGame.TeamColor color, String username) throws DataAccessException, InvalidRequestException;
     //clear all games
     void clearGames() throws DataAccessException;
-    //give new gameID
-    int newGameID();
 }

@@ -16,9 +16,13 @@ public class GameMemoryDAO implements GameDAO{
     }
 
     //Create a new game.
-    public void createGame(GameData game) {
+    public GameData createGame(GameData game) throws InvalidRequestException{
+        if(!game.verifyFields()){
+            throw new InvalidRequestException("Expected game name and game.");
+        }
+        game = game.setGameID(++gameNum);
         games.add(game);
-        gameNum++;
+        return game;
     }
 
     //Retrieve a specified game with the given game ID.
@@ -36,6 +40,7 @@ public class GameMemoryDAO implements GameDAO{
     // This is used when players join a game or when a move is made.
     public void updateGame(int gameID, GameData game) throws InvalidRequestException {
         int index = getGameIndex(gameID);
+        game = game.setGameID(gameID);
         games.set(index, game);
     }
 
@@ -49,11 +54,6 @@ public class GameMemoryDAO implements GameDAO{
     public void clearGames(){
         games.clear();
         gameNum = 0;
-    }
-
-    //give new game ID
-    public int newGameID(){
-        return gameNum + 1;
     }
 
     private int getGameIndex(int gameID) throws InvalidRequestException {

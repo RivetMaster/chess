@@ -21,10 +21,10 @@ public class GameService {
         authServ = new AuthService(authDAO);
     }
 
-    public CreateGameResult createGame(CreateGameRequest req) throws DataAccessException, InvalidAuthTokenException {
+    public CreateGameResult createGame(CreateGameRequest req) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         authServ.verifyAuth(req.authToken());
-        GameData game = new GameData(gameDAO.newGameID(), null, null, req.gameName(), new ChessGame());
-        gameDAO.createGame(game);
+        GameData game = new GameData(0, null, null, req.gameName(), new ChessGame());
+        game = gameDAO.createGame(game);
         return new CreateGameResult(game.gameID());
     }
 
