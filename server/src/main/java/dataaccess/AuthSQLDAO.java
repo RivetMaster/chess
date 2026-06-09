@@ -7,6 +7,9 @@ import service.exceptions.InvalidAuthTokenException;
 
 import java.sql.*;
 
+import static dataaccess.QuerySQLDatabase.executeUpdate;
+import static dataaccess.QuerySQLDatabase.getCount;
+
 public class AuthSQLDAO implements AuthDAO{
     public AuthSQLDAO() throws DataAccessException {
         configureDatabase();
@@ -57,40 +60,18 @@ public class AuthSQLDAO implements AuthDAO{
 
     @Override
     public int numAuths() throws DataAccessException{
-        int num;
         var statement = "SELECT COUNT(0) from Auths";
-        try (Connection conn = DatabaseManager.getConnection()){
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                try (ResultSet rs = ps.executeQuery()) {
-                    rs.next();
-                    num = rs.getInt(1);
-                }
-            }
+        try {
+            return getCount(statement);
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to count auths: %s", e.getMessage()));
         }
-        return num;
     }
 
     @Override
     public void clearAuth() throws DataAccessException {
         var statement = "TRUNCATE Auths";
         executeUpdate(statement);
-    }
-
-
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                }
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
     }
 
     private final String[] createStatements = {"""

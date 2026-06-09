@@ -10,7 +10,8 @@ import server.InvalidRequestException;
 import java.sql.*;
 import java.util.ArrayList;
 
-import static java.sql.Types.NULL;
+import static dataaccess.QuerySQLDatabase.executeUpdate;
+import static dataaccess.QuerySQLDatabase.getCount;
 
 public class GameSQLDAO implements GameDAO{
     public GameSQLDAO() throws DataAccessException {
@@ -53,19 +54,12 @@ public class GameSQLDAO implements GameDAO{
     }
 
     private int getNumGames() throws DataAccessException {
-        int num;
         var statement = "SELECT COUNT(0) FROM Games";
-        try (Connection conn = DatabaseManager.getConnection()){
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                try (ResultSet rs = ps.executeQuery()) {
-                    rs.next();
-                    num = rs.getInt(1);
-                }
-            }
+        try {
+            return getCount(statement);
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to count games: %s", e.getMessage()));
         }
-        return num;
     }
 
     @Override
@@ -112,28 +106,6 @@ public class GameSQLDAO implements GameDAO{
     public void clearGames() throws DataAccessException {
         var statement = "TRUNCATE Games";
         executeUpdate(statement);
-    }
-
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                ResultSet rs = ps.getGeneratedKeys();
-                if(rs.next()){
-                    return rs.getInt(1);
-                }
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
     }
 
     private final String[] createStatements = {"""

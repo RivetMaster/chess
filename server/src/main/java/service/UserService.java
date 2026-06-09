@@ -22,7 +22,8 @@ public class UserService {
     }
 
     //register new user in database with login  info, and log them in.
-    public RegisterUserResult register(RegisterUserRequest req) throws DataAccessException, UnavailableException, InvalidLogInException, InvalidRequestException {
+    public RegisterUserResult register(RegisterUserRequest req)
+            throws DataAccessException, UnavailableException, InvalidLogInException, InvalidRequestException {
         try{
             getUser(req.username());
             throw new UnavailableException("Username Taken");

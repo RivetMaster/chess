@@ -7,6 +7,9 @@ import server.InvalidRequestException;
 
 import java.sql.*;
 
+import static dataaccess.QuerySQLDatabase.executeUpdate;
+import static dataaccess.QuerySQLDatabase.getCount;
+
 public class UserSQLDAO implements UserDAO{
 
     public UserSQLDAO() throws DataAccessException {
@@ -54,19 +57,12 @@ public class UserSQLDAO implements UserDAO{
 
     @Override
     public int getNumUsers() throws DataAccessException {
-        int num;
         var statement = "SELECT COUNT(0) FROM Users";
-        try (Connection conn = DatabaseManager.getConnection()){
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                try (ResultSet rs = ps.executeQuery()) {
-                    rs.next();
-                    num = rs.getInt(1);
-                }
-            }
-        } catch (Exception e) {
+        try{
+            return getCount(statement);
+        } catch(Exception e) {
             throw new DataAccessException(String.format("Unable to count users: %s", e.getMessage()));
         }
-        return num;
     }
 
     @Override
@@ -74,19 +70,6 @@ public class UserSQLDAO implements UserDAO{
         return BCrypt.checkpw(inputPW, storedPW);
     }
 
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                }
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
 
     private final String[] createStatements = {"""
             CREATE TABLE IF NOT EXISTS `Users` (

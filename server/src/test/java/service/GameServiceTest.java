@@ -56,7 +56,8 @@ public class GameServiceTest {
     //positive test for createGame, and listGames
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void createGameClass(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
+    void createGameClass(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
@@ -71,7 +72,8 @@ public class GameServiceTest {
     //test clears games positive
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void clear(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
+    void clear(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
@@ -86,12 +88,14 @@ public class GameServiceTest {
     //create game negative
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void createGameUnauthorized(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
+    void createGameUnauthorized(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
 
-        assertThrows(InvalidAuthTokenException.class, () -> service.createGame(new CreateGameRequest("game 3", "token")));
+        assertThrows(InvalidAuthTokenException.class, () ->
+                service.createGame(new CreateGameRequest("game 3", "token")));
         AuthData auth = authDAO.createAuth("Mary");
         assert(service.listGames(new ListGamesRequest(auth.authToken())).games().isEmpty());
     }
@@ -99,7 +103,8 @@ public class GameServiceTest {
     //tests list games negative
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void listGamesUnauthorized(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException {
+    void listGamesUnauthorized(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
@@ -111,7 +116,8 @@ public class GameServiceTest {
     //positive test for joining Game
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void joinGame(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
+    void joinGame(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
@@ -127,7 +133,8 @@ public class GameServiceTest {
     //negative test for joining game
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void joinGameFull(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
+    void joinGameFull(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
@@ -136,13 +143,15 @@ public class GameServiceTest {
         AuthData auth2 = authDAO.createAuth("Ruby");
         CreateGameResult game = service.createGame(new CreateGameRequest("Game 5", auth1.authToken()));
         service.joinGame(new JoinGameRequest(game.gameID(), WHITE, auth1));
-        assertThrows(UnavailableException.class, () -> service.joinGame(new JoinGameRequest(game.gameID(), WHITE, auth2)));
+        assertThrows(UnavailableException.class, () ->
+                service.joinGame(new JoinGameRequest(game.gameID(), WHITE, auth2)));
     }
 
     //positive test for leaveGame
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void leaveGame(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
+    void leaveGame(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
@@ -160,14 +169,16 @@ public class GameServiceTest {
     //negative test for leaveGame
     @ParameterizedTest
     @MethodSource("provideClasses")
-    void leaveGameNotIn(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao) throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
+    void leaveGameNotIn(Class<? extends AuthDAO> adao, Class<? extends GameDAO> gdao)
+            throws DataAccessException, InvalidAuthTokenException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
         GameDAO gameDAO = gameGetDataAccess(gdao);
         GameService service = new GameService(gameDAO, authDAO);
 
         AuthData auth = authDAO.createAuth("Gary");
         CreateGameResult game = service.createGame(new CreateGameRequest("Game 7", auth.authToken()));
-        assertThrows(InvalidRequestException.class, () -> service.leaveGame(new JoinGameRequest(game.gameID(), WHITE, auth)));
+        assertThrows(InvalidRequestException.class, () ->
+                service.leaveGame(new JoinGameRequest(game.gameID(), WHITE, auth)));
     }
 
 }
