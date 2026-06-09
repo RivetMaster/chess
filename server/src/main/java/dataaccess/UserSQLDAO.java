@@ -48,7 +48,7 @@ public class UserSQLDAO implements UserDAO{
     @Override
     public int getNumUsers() throws DataAccessException {
         int num;
-        var statement = "SELECT COUNT(0) from Users";
+        var statement = "SELECT COUNT(0) FROM Users";
         try (Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
@@ -60,6 +60,11 @@ public class UserSQLDAO implements UserDAO{
             throw new DataAccessException(String.format("Unable to count users: %s", e.getMessage()));
         }
         return num;
+    }
+
+    @Override
+    public boolean pwEquals(String inputPW, String storedPW){
+        return BCrypt.checkpw(inputPW, storedPW);
     }
 
     private void executeUpdate(String statement, Object... params) throws DataAccessException {

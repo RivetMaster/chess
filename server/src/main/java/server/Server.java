@@ -19,7 +19,6 @@ public class Server {
     private final GameService gameServ;
     private final DBService dbServ;
     private final Gson serialize;
-    private final boolean SQL = true;
 
     public Server() {
         AuthDAO authDAO = new AuthMemoryDAO();
@@ -113,7 +112,7 @@ public class Server {
     private void logIn(Context ctx) throws InvalidRequestException, DataAccessException, InvalidLogInException {
         //Logs in an existing user (takes in user, password), (returns a new authToken)
         LogInRequest req = serialize.fromJson(ctx.body(), LogInRequest.class);
-        req = new LogInRequest(req.username(), req.password(), SQL);
+        req = new LogInRequest(req.username(), req.password());
         if(!req.existingFields()){
             //invalid request if missing fields or just whitespace
             throw new InvalidRequestException("Expecting username and password.");
@@ -125,7 +124,7 @@ public class Server {
     private void register(Context ctx) throws UnavailableException, DataAccessException, InvalidRequestException, InvalidLogInException {
         //should be given user, password, and email
         RegisterUserRequest req = serialize.fromJson(ctx.body(), RegisterUserRequest.class);
-        req = new RegisterUserRequest(req.username(), req.password(), req.email(), SQL);
+        req = new RegisterUserRequest(req.username(), req.password(), req.email());
         if(!req.existingFields()){
             //invalid request if missing field or just whitespace
             throw new InvalidRequestException("Expecting username, password, and email.");

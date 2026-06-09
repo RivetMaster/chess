@@ -11,4 +11,6 @@ public interface UserDAO {
     void clearUsers() throws DataAccessException;
     //return number of users
     int getNumUsers() throws DataAccessException;
+    //return if passwords match
+    boolean pwEquals(String inputPW, String storedPW);
 }

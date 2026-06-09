@@ -40,4 +40,9 @@ public class UserMemoryDAO implements  UserDAO{
         users.clear();
     }
 
+    @Override
+    public boolean pwEquals(String inputPW, String storedPW){
+        return inputPW.equals(storedPW);
+    }
+
 }

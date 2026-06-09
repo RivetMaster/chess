@@ -28,7 +28,7 @@ public class UserService {
             throw new UnavailableException("Username Taken");
         } catch(DataAccessException e){ //username doesn't exist
             users.createUser(new UserData(req.username(), req.password(), req.email()));
-            LogInResult log = logIn(new LogInRequest(req.username(), req.password(), req.sql()));
+            LogInResult log = logIn(new LogInRequest(req.username(), req.password()));
             return new RegisterUserResult(log.username(), log.authToken());
         }
     }
@@ -37,8 +37,7 @@ public class UserService {
     public LogInResult logIn(LogInRequest req) throws DataAccessException, InvalidLogInException {
         try{
             UserData u = users.getUser(req.username());
-            if(u != null && (!req.sql() && u.password().equals(req.password()) ||
-                             (req.sql() && BCrypt.checkpw(req.password(), u.password())) ) ){
+            if(u != null && users.pwEquals(req.password(), u.password()) ){
                 AuthData auth = authServ.addAuth(req.username());
                 return new LogInResult(req.username(), auth.authToken());
             }
