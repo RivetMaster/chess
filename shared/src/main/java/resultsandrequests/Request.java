@@ -1,5 +1,5 @@
 package resultsandrequests;
 
 public interface Request {
-    public boolean existingFields();
+    boolean existingFields();
 }
