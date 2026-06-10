@@ -3,14 +3,18 @@ package service;
 
 import dataaccess.*;
 
+import exceptions.DataAccessException;
 import model.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import server.InvalidRequestException;
-import service.exceptions.InvalidAuthTokenException;
-import service.exceptions.UnavailableException;
-import service.resultsandrequests.*;
+import resultsandrequests.CreateGameRequest;
+import resultsandrequests.CreateGameResult;
+import resultsandrequests.JoinGameRequest;
+import resultsandrequests.ListGamesRequest;
+import exceptions.InvalidRequestException;
+import exceptions.InvalidAuthTokenException;
+import exceptions.UnavailableException;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;

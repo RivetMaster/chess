@@ -2,12 +2,12 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import exceptions.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
+import resultsandrequests.*;
 import service.*;
-import service.exceptions.*;
-import service.resultsandrequests.*;
 
 import java.util.Map;
 

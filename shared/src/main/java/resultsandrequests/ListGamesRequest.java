@@ -1,4 +1,4 @@
-package service.resultsandrequests;
+package resultsandrequests;
 
 public record ListGamesRequest(String authToken) implements Request {
 

@@ -4,10 +4,11 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import chess.InvalidMoveException;
+import exceptions.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import server.InvalidRequestException;
+import exceptions.InvalidRequestException;
 
 import static chess.ChessGame.TeamColor.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -1,13 +1,14 @@
 package service;
 
 import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
+import exceptions.DataAccessException;
 import dataaccess.UserDAO;
+import exceptions.InvalidAuthTokenException;
+import exceptions.InvalidLogInException;
+import exceptions.UnavailableException;
 import model.*;
-import server.InvalidRequestException;
-import service.exceptions.*;
-import service.resultsandrequests.*;
-
+import resultsandrequests.*;
+import exceptions.InvalidRequestException;
 
 
 public class UserService {

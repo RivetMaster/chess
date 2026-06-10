@@ -1,9 +1,11 @@
 package dataaccess;
 
 import java.sql.Connection;
+
+import exceptions.DataAccessException;
 import model.*;
-import server.InvalidRequestException;
-import service.exceptions.InvalidAuthTokenException;
+import exceptions.InvalidRequestException;
+import exceptions.InvalidAuthTokenException;
 
 import java.sql.*;
 

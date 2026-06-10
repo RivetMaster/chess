@@ -2,12 +2,13 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
+import exceptions.DataAccessException;
 import dataaccess.GameDAO;
+import exceptions.InvalidAuthTokenException;
+import exceptions.UnavailableException;
 import model.GameData;
-import server.InvalidRequestException;
-import service.exceptions.*;
-import service.resultsandrequests.*;
+import resultsandrequests.*;
+import exceptions.InvalidRequestException;
 
 import static chess.ChessGame.TeamColor.*;
 

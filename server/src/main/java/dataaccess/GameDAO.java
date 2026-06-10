@@ -1,8 +1,9 @@
 package dataaccess;
 
 import chess.ChessGame;
+import exceptions.DataAccessException;
 import model.GameData;
-import server.InvalidRequestException;
+import exceptions.InvalidRequestException;
 
 import java.util.ArrayList;
 

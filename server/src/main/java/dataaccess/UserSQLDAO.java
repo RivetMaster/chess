@@ -1,9 +1,11 @@
 package dataaccess;
 
 import java.sql.Connection;
+
+import exceptions.DataAccessException;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
-import server.InvalidRequestException;
+import exceptions.InvalidRequestException;
 
 import java.sql.*;
 

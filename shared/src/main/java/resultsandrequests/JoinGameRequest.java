@@ -1,4 +1,4 @@
-package service.resultsandrequests;
+package resultsandrequests;
 
 import chess.ChessGame;
 import model.AuthData;

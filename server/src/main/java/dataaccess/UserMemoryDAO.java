@@ -1,7 +1,7 @@
 package dataaccess;
 
 import model.UserData;
-import server.InvalidRequestException;
+import exceptions.InvalidRequestException;
 
 import java.util.ArrayList;
 

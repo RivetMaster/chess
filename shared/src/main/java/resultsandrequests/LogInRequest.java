@@ -1,4 +1,4 @@
-package service.resultsandrequests;
+package resultsandrequests;
 
 public record LogInRequest(String username, String password) implements Request{
 

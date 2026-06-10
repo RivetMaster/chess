@@ -1,4 +1,4 @@
-package service.resultsandrequests;
+package resultsandrequests;
 
 public interface Request {
     public boolean existingFields();

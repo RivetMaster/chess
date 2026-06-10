@@ -1,4 +1,4 @@
-package service.exceptions;
+package exceptions;
 
 public class UnavailableException extends Exception{
     public UnavailableException(String message) {

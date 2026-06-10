@@ -1,8 +1,9 @@
 package dataaccess;
 
+import exceptions.DataAccessException;
 import model.AuthData;
-import server.InvalidRequestException;
-import service.exceptions.InvalidAuthTokenException;
+import exceptions.InvalidRequestException;
+import exceptions.InvalidAuthTokenException;
 
 import java.util.UUID;
 

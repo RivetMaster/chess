@@ -1,12 +1,11 @@
 package dataaccess;
 
+import exceptions.DataAccessException;
 import model.UserData;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mindrot.jbcrypt.BCrypt;
-import server.InvalidRequestException;
-import service.exceptions.*;
-import service.resultsandrequests.*;
+import exceptions.InvalidRequestException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,7 +1,8 @@
 package dataaccess;
 
+import exceptions.DataAccessException;
 import model.UserData;
-import server.InvalidRequestException;
+import exceptions.InvalidRequestException;
 
 public interface UserDAO {
     //Create a new user.

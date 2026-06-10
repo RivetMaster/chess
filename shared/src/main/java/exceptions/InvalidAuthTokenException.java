@@ -1,4 +1,4 @@
-package service.exceptions;
+package exceptions;
 
 public class InvalidAuthTokenException extends Exception {
     public InvalidAuthTokenException(String message) {

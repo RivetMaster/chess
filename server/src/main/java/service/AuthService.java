@@ -1,10 +1,10 @@
 package service;
 
 import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
+import exceptions.DataAccessException;
 import model.AuthData;
-import server.InvalidRequestException;
-import service.exceptions.InvalidAuthTokenException;
+import exceptions.InvalidRequestException;
+import exceptions.InvalidAuthTokenException;
 
 public class AuthService {
 

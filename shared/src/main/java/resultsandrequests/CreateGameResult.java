@@ -1,4 +1,4 @@
-package service.resultsandrequests;
+package resultsandrequests;
 
 
 public record CreateGameResult(int gameID) implements Result{
