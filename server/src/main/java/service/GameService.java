@@ -38,19 +38,19 @@ public class GameService {
         return new ListGamesResult(gameDAO.listGames());
     }
 
-    public VoidResult joinGame(JoinGameRequest req)
+    public void joinGame(JoinGameRequest req)
             throws DataAccessException, InvalidAuthTokenException, UnavailableException, InvalidRequestException {
         authServ.verifyAuth(req.auth().authToken());
         GameData game = gameDAO.getGame(req.gameID());
         if(req.playerColor() == WHITE){
             if(game.whiteUsername() == null){
                 gameDAO.addPlayer(req.gameID(), req.playerColor(), req.auth().username());
-                return new VoidResult();
+                return;
             }
         } else {
             if(game.blackUsername() == null){
                 gameDAO.addPlayer(req.gameID(), req.playerColor(), req.auth().username());
-                return new VoidResult();
+                return;
             }
         }
         throw new UnavailableException("Team Not Available");
