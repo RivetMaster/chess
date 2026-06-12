@@ -8,7 +8,7 @@ import server.Server;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
@@ -50,7 +50,10 @@ public class ServerFacadeTests {
     //positive test for register User
     @Test
     public void registerUser() throws ResponseException {
-        serverFacade.register(new RegisterUserRequest("Hippo", "GrassEater", "ManKiller!"));
+        RegisterUserResult result =
+            serverFacade.register(new RegisterUserRequest("Hippo", "GrassEater", "ManKiller!"));
+        assert(result.username().equals("Hippo"));
+        assert(result.authToken().length() > 10);
     }
 
     //negative test for register User
@@ -64,8 +67,11 @@ public class ServerFacadeTests {
     //positive test for login
     @Test
     public void logIn() throws ResponseException {
-        serverFacade.register(new RegisterUserRequest("Jake", "Wakey", "bakeSale@"));
-        serverFacade.logIn(new LogInRequest("Jake", "Wakey"));
+        RegisterUserResult regResult =
+                serverFacade.register(new RegisterUserRequest("Jake", "Wakey", "bakeSale@"));
+        LogInResult logResult = serverFacade.logIn(new LogInRequest("Jake", "Wakey"));
+        assert(regResult.username().equals(logResult.username()));
+        assertNotEquals(regResult.authToken(), logResult.authToken());
     }
 
     //negative test for login
@@ -75,12 +81,14 @@ public class ServerFacadeTests {
                 serverFacade.logIn(new LogInRequest("Humpty", "cracked")));
     }
 
-    //positive logOUt test
+    //positive logOut test
     @Test
     public void logOut() throws ResponseException {
         RegisterUserResult result = serverFacade.register(new RegisterUserRequest("abc", "def", "ghijk@"));
         String authToken = result.authToken();
         serverFacade.logOut(new LogOutRequest(authToken));
+        assertThrows(ResponseException.class, () ->
+                serverFacade.listGames(new ListGamesRequest(authToken)));
     }
 
     //negative logout test
