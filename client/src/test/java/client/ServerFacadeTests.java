@@ -1,6 +1,7 @@
 package client;
 
 import exceptions.ResponseException;
+import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import resultsandrequests.*;
@@ -8,6 +9,7 @@ import server.Server;
 
 import java.util.ArrayList;
 
+import static chess.ChessGame.TeamColor.WHITE;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -142,6 +144,32 @@ public class ServerFacadeTests {
                 serverFacade.createGame( new CreateGameRequest("uR", "Dad")));
     }
 
+    //positive join game test
+    @Test
+    public void joinGame() throws ResponseException{
+        RegisterUserResult result = serverFacade.register(new RegisterUserRequest("e", "e", "e"));
+        String authToken = result.authToken();
+        serverFacade.createGame(new CreateGameRequest("eGame", authToken));
+        ArrayList<GameData> games = serverFacade.listGames(new ListGamesRequest(authToken)).games();
+        serverFacade.joinGame(new JoinGameRequest(games.getFirst().gameID(), WHITE, new AuthData(authToken, "e")));
+        games = serverFacade.listGames(new ListGamesRequest(authToken)).games();
+        assert(games.getFirst().whiteUsername().equals("e"));
+    }
 
+    //negative join game test
+    @Test
+    public void joinGameUnauthorized() {
+        assertThrows(ResponseException.class, () ->
+                serverFacade.joinGame(new JoinGameRequest(1, WHITE, new AuthData("notToken", "ev"))));
+    }
+
+    //negative join game test
+    @Test
+    public void joinGameInvalidID() throws ResponseException {
+        RegisterUserResult result = serverFacade.register(new RegisterUserRequest("e", "e", "e"));
+        String authToken = result.authToken();
+        assertThrows(ResponseException.class, () ->
+                serverFacade.joinGame(new JoinGameRequest(2, WHITE, new AuthData(authToken, "e"))));
+    }
 
 }
