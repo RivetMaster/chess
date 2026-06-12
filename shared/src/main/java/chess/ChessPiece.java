@@ -105,6 +105,50 @@ public class ChessPiece {
         return " ";
     }
 
+    public String toStringBoard() {
+        //maybe find data construct like dictionary, make and just return co-value, use makeUpper or something like that if white
+        if(color == WHITE){ // uppercase
+            if(type == PAWN) {
+                return " ♙ ";
+            }
+            if(type == ROOK) {
+                return " ♖ ";
+            }
+            if(type == QUEEN) {
+                return " ♕ ";
+            }
+            if(type == KNIGHT) {
+                return " ♘ ";
+            }
+            if(type == KING) {
+                return " ♔ ";
+            }
+            if(type == BISHOP) {
+                return " ♗ ";
+            }
+        }
+        //lowercase
+        if(type == PAWN) {
+            return " ♟ ";
+        }
+        if(type == ROOK) {
+            return " ♜ ";
+        }
+        if(type == QUEEN) {
+            return " ♛ ";
+        }
+        if(type == KNIGHT) {
+            return " ♞ ";
+        }
+        if(type == KING) {
+            return " ♚ ";
+        }
+        if(type == BISHOP) {
+            return " ♝ ";
+        }
+        return " \u2003 ";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
