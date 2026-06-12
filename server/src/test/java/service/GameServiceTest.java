@@ -17,6 +17,7 @@ import exceptions.InvalidAuthTokenException;
 import exceptions.UnavailableException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static chess.ChessGame.TeamColor.*;
@@ -48,12 +49,8 @@ public class GameServiceTest {
     }
 
     private static Stream<Arguments> provideGameClasses() {
-        return Stream.of(
-                Arguments.of(AuthMemoryDAO.class, GameMemoryDAO.class),
-                Arguments.of(AuthSQLDAO.class, GameMemoryDAO.class),
-                Arguments.of(AuthMemoryDAO.class, GameSQLDAO.class),
-                Arguments.of(AuthSQLDAO.class, GameSQLDAO.class)
-        );
+        return Arrays.stream(TestMethodClass.provideClasses(new Class[]{GameMemoryDAO.class, GameSQLDAO.class},
+                null));
     }
 
     //test creating one game

@@ -33,7 +33,7 @@ public class ClientMain {
     }
 
     private void scanInput(){
-        boolean TESTING = true;
+        boolean testing = true;
         Scanner scanner = new Scanner(System.in);
         state = SIGNED_OUT;
 
@@ -60,7 +60,7 @@ public class ClientMain {
                 output.append(ui.helpMenu(state));
             }
             //clear (TESTING only)
-            else if(TESTING && line.equalsIgnoreCase("clear")){
+            else if(testing && line.equalsIgnoreCase("clear")){
                 output.append(ui.clear());
                 state = SIGNED_OUT;
             }

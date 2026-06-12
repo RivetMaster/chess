@@ -11,6 +11,7 @@ import resultsandrequests.LogOutRequest;
 import resultsandrequests.RegisterUserRequest;
 import resultsandrequests.RegisterUserResult;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,18 +40,14 @@ public class UserServiceTest {
         return db;
     }
 
-    private static Stream<Arguments> provideClasses() {
-        return Stream.of(
-                Arguments.of(AuthMemoryDAO.class, UserMemoryDAO.class),
-                Arguments.of(AuthSQLDAO.class, UserMemoryDAO.class),
-                Arguments.of(AuthMemoryDAO.class, UserSQLDAO.class),
-                Arguments.of(AuthSQLDAO.class, UserSQLDAO.class)
-        );
+    private static Stream<Arguments> provideUserClasses() {
+        return Arrays.stream(TestMethodClass.provideClasses(null,
+                new Class[]{UserMemoryDAO.class, UserSQLDAO.class}));
     }
 
     //log out invalid negative test
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideUserClasses")
     void logOutNotIn(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao) throws DataAccessException {
         AuthDAO authDAO = authGetDataAccess(adao);
         UserDAO userDAO = userGetDataAccess(udao);
@@ -62,7 +59,7 @@ public class UserServiceTest {
 
     //log in invalid negative test
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideUserClasses")
     void logInNotRegistered (Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao) throws DataAccessException {
         AuthDAO authDAO = authGetDataAccess(adao);
         UserDAO userDAO = userGetDataAccess(udao);
@@ -74,7 +71,7 @@ public class UserServiceTest {
 
     //register same username twice fail, negative test
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideUserClasses")
     void registerSameNameTwice(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
             throws UnavailableException, DataAccessException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -88,7 +85,7 @@ public class UserServiceTest {
 
     //register user, positive test
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideUserClasses")
     void registerUser(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
             throws UnavailableException, DataAccessException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -107,7 +104,7 @@ public class UserServiceTest {
 
     //clear users, positive test
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideUserClasses")
     void clearUsers(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
             throws UnavailableException, DataAccessException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);
@@ -128,7 +125,7 @@ public class UserServiceTest {
 
     //log in and log out user positive test
     @ParameterizedTest
-    @MethodSource("provideClasses")
+    @MethodSource("provideUserClasses")
     void logInAndOut(Class<? extends AuthDAO> adao, Class<? extends UserDAO> udao)
             throws UnavailableException, DataAccessException, InvalidAuthTokenException, InvalidLogInException, InvalidRequestException {
         AuthDAO authDAO = authGetDataAccess(adao);

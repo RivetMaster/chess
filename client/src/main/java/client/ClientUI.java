@@ -64,10 +64,7 @@ public class ClientUI {
             RegisterUserResult result = serverFacade.register(request);
             return new UIResponse("Account successfully made and signed in as " + result.username(), result.authToken());
         } catch (ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return new UIResponse(red("Error: Could not connect to the server."), null);
-            }
-            return new UIResponse(red(e.getMessage()), null);
+            return handleError(e, null);
         }
     }
 
@@ -77,10 +74,7 @@ public class ClientUI {
             LogInResult result = serverFacade.logIn(request);
             return new UIResponse("Successfully signed in as " + result.username(), result.authToken());
         } catch (ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return new UIResponse(red("Error: Could not connect to the server."), null);
-            }
-            return new UIResponse(red(e.getMessage()), null);
+            return handleError(e, null);
         }
     }
 
@@ -89,10 +83,7 @@ public class ClientUI {
             serverFacade.clear();
             return "Successfully cleared database.";
         } catch (ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return red("Error: Could not connect to the server.");
-            }
-            return red(e.getMessage());
+            return handleError(e, null).message();
         }
     }
 
@@ -101,10 +92,7 @@ public class ClientUI {
             serverFacade.logOut(new LogOutRequest(authToken));
             return new UIResponse("Successfully logged out.", null);
         } catch( ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return new UIResponse(red("Error: Could not connect to the server."), authToken);
-            }
-            return new UIResponse(red(e.getMessage()), authToken);
+            return handleError(e, authToken);
         }
     }
 
@@ -114,10 +102,7 @@ public class ClientUI {
            updateGameIDList(authToken);
            return "Successfully created a new chess game with ID " + getKeyFromID(result.gameID());
         } catch(ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return red("Error: Could not connect to the server.");
-            }
-            return red(e.getMessage());
+            return handleError(e, null).message();
         }
     }
 
@@ -151,10 +136,7 @@ public class ClientUI {
             }
             return output.toString();
         } catch(ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return red("Error: Could not connect to the server.");
-            }
-            return red(e.getMessage());
+           return handleError(e, null).message();
         }
     }
 
@@ -167,10 +149,7 @@ public class ClientUI {
             return new UIResponse("Successfully joined game " + id +" as team "
                     +color + ".\n" + printBoard(gameIDs.get(id), color, authToken), authToken);
         } catch(ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return new UIResponse(red("Error: Could not connect to the server."), null);
-            }
-            return new UIResponse(red(e.getMessage()), null);
+            return handleError(e, null);
         }
     }
 
@@ -181,10 +160,7 @@ public class ClientUI {
         try {
             return new UIResponse("Now observing game " + id + "\n" + printBoard(gameIDs.get(id), WHITE, authToken), authToken);
         } catch(ResponseException e){
-            if(e.code() == ResponseException.Code.ServerError) {
-                return new UIResponse(red("Error: Could not connect to the server."), null);
-            }
-            return new UIResponse(red(e.getMessage()), null);
+            return handleError(e, null);
         }
     }
 
@@ -221,7 +197,6 @@ public class ClientUI {
             board.append(boarderColor("    h  g  f  e  d  c  b  a    ")).append("\n");
 
         }
-
 
         return board.toString();
     }
@@ -279,5 +254,12 @@ public class ClientUI {
         }
 
         return boardRow.toString();
+    }
+
+    private UIResponse handleError(ResponseException e, String authToken){
+        if(e.code() == ResponseException.Code.ServerError) {
+            return new UIResponse(red("Error: Could not connect to the server."), authToken);
+        }
+        return new UIResponse(red(e.getMessage()), authToken);
     }
 }
