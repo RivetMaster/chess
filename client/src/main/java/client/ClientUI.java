@@ -12,6 +12,7 @@ import resultsandrequests.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
@@ -119,16 +120,9 @@ public class ClientUI {
                 for(int k = 0; k < result.games().size(); k++){ //check every game returned by listGames
                     if(result.games().get(k).gameID() == gameIDs.get(i+1)){ //if the id of the game in list games corresponds to the key's value
                         output.append(result.games().get(k).gameName()).append("    | <");
-                        if(result.games().get(k).whiteUsername() == null){
-                            output.append("AVAILABLE, ");
-                        } else{
-                            output.append(result.games().get(k).whiteUsername()).append(", ");
-                        }
-                        if(result.games().get(k).blackUsername() == null){
-                            output.append("AVAILABLE");
-                        } else{
-                            output.append(result.games().get(k).blackUsername());
-                        }
+                        output.append(Objects.requireNonNullElse(result.games().get(k).whiteUsername(), "AVAILABLE"));
+                        output.append(", ");
+                        output.append(Objects.requireNonNullElse(result.games().get(k).blackUsername(), "AVAILABLE"));
                         output.append(">\n");
                         break;
                     }
@@ -221,16 +215,8 @@ public class ClientUI {
             for(int row = 8; row > 0; row--) {
                 boardRow.append(boarderColor(" " + row +" "));
                 for (int col = 1; col <= 8; col++) {
-                    if (col % 2 == row % 2) {
-                        boardRow.append(SET_BG_COLOR_WHITE); //black square
-                    }
                     ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                    if(piece != null) {
-                        boardRow.append(board.getPiece(new ChessPosition(row, col)).toStringBoard());
-                    } else{
-                        boardRow.append(EMPTY);
-                    }
-                    boardRow.append(RESET_BG_COLOR);
+                    boardRow.append(drawPiece(row, col, piece));
                 }
                 boardRow.append(boarderColor(" " + row +" ")).append("\n");
             }
@@ -238,22 +224,28 @@ public class ClientUI {
             for(int row = 1; row <= 8; row++) {
                 boardRow.append(boarderColor(" " + row +" "));
                 for (int col = 8; col > 0 ; col--) {
-                    if (col % 2 == row % 2) {
-                        boardRow.append(SET_BG_COLOR_WHITE); //black square
-                    }
                     ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                    if(piece != null) {
-                        boardRow.append(board.getPiece(new ChessPosition(row, col)).toStringBoard());
-                    } else{
-                        boardRow.append(EMPTY);
-                    }
-                    boardRow.append(RESET_BG_COLOR);
+                    boardRow.append(drawPiece(row, col, piece));
                 }
                 boardRow.append(boarderColor(" " + row +" ")).append("\n");
             }
         }
 
         return boardRow.toString();
+    }
+
+    private String drawPiece(int row, int col, ChessPiece chessPiece){
+        StringBuilder piece = new StringBuilder();
+        if (col % 2 != row % 2) {
+            piece.append(SET_BG_COLOR_WHITE); //white square
+        }
+        if(chessPiece != null) {
+            piece.append(chessPiece.toStringBoard());
+        } else{
+            piece.append(EMPTY);
+        }
+        piece.append(RESET_BG_COLOR);
+        return piece.toString();
     }
 
     private UIResponse handleError(ResponseException e, String authToken){
