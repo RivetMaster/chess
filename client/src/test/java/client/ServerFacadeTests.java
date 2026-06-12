@@ -37,13 +37,28 @@ public class ServerFacadeTests {
         serverFacade.clear();
     }
 
-    //positive and negative tests for register User
+    @Test
+    public void clearTest() throws ResponseException {
+        RegisterUserResult result =
+                serverFacade.register(new RegisterUserRequest("a", "b", "c"));
+        serverFacade.logOut(new LogOutRequest(result.authToken()));
+        serverFacade.clear();
+        assertThrows(ResponseException.class, () ->
+                serverFacade.logIn(new LogInRequest("a", "b")));
+    }
+
+    //positive test for register User
     @Test
     public void registerUser() throws ResponseException {
         serverFacade.register(new RegisterUserRequest("Hippo", "GrassEater", "ManKiller!"));
+    }
+
+    //negative test for register User
+    @Test
+    public void registerUserDuplicate() throws ResponseException{
+        serverFacade.register(new RegisterUserRequest("Hippo", "GrassEater", "ManKiller!"));
         assertThrows(ResponseException.class, () ->
                 serverFacade.register(new RegisterUserRequest("Hippo", "Grass2Eater", "Man3Killer!")));
-
     }
 
     //positive test for login
