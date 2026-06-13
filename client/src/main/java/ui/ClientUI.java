@@ -4,7 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import client.ClientMain;
+import client.Client;
 import exceptions.ResponseException;
 import model.GameData;
 
@@ -12,17 +12,15 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
-import static chess.ChessGame.TeamColor.BLACK;
-import static chess.ChessGame.TeamColor.WHITE;
-import static client.ClientMain.State.*;
-import static client.ClientMain.State.WATCHING_GAME;
+import static chess.ChessGame.TeamColor.*;
+import static client.Client.State.*;
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 
 public class ClientUI {
 
 
-    public static String helpMenu(ClientMain.State state){
+    public static String helpMenu(Client.State state){
         StringBuilder uiOutput = new StringBuilder();
         if(state == SIGNED_OUT){
             uiOutput.append(bold("REGISTER <Username> <Password> <Email> ")).append(": To create an account\n");
@@ -85,7 +83,7 @@ public class ClientUI {
         return output.toString();
     }
 
-    public static String printBoard(int gameID, ChessGame.TeamColor color, String authToken, ChessGame chessGame) throws ResponseException {
+    public static String printBoard(ChessGame.TeamColor color, ChessGame chessGame) throws ResponseException {
         StringBuilder board = new StringBuilder();
         ChessBoard chessBoard = chessGame.getBoard();
         //Boarder Above
@@ -109,26 +107,28 @@ public class ClientUI {
 
     public static String drawBoard(ChessBoard board, ChessGame.TeamColor color){
         StringBuilder boardRow = new StringBuilder();
-        if(color == WHITE){
-            for(int row = 8; row > 0; row--) {
-                boardRow.append(boarderColor(" " + row +" "));
-                for (int col = 1; col <= 8; col++) {
-                    ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                    boardRow.append(drawPiece(row, col, piece));
+        switch(color) {
+            case WHITE -> {
+                for (int row = 8; row > 0; row--) {
+                    boardRow.append(boarderColor(" " + row + " "));
+                    for (int col = 1; col <= 8; col++) {
+                        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                        boardRow.append(drawPiece(row, col, piece));
+                    }
+                    boardRow.append(boarderColor(" " + row + " ")).append("\n");
                 }
-                boardRow.append(boarderColor(" " + row +" ")).append("\n");
             }
-        } else if(color == BLACK){
-            for(int row = 1; row <= 8; row++) {
-                boardRow.append(boarderColor(" " + row +" "));
-                for (int col = 8; col > 0 ; col--) {
-                    ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                    boardRow.append(drawPiece(row, col, piece));
+            case BLACK -> {
+                for (int row = 1; row <= 8; row++) {
+                    boardRow.append(boarderColor(" " + row + " "));
+                    for (int col = 8; col > 0; col--) {
+                        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                        boardRow.append(drawPiece(row, col, piece));
+                    }
+                    boardRow.append(boarderColor(" " + row + " ")).append("\n");
                 }
-                boardRow.append(boarderColor(" " + row +" ")).append("\n");
             }
         }
-
         return boardRow.toString();
     }
 

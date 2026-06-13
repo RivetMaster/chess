@@ -88,7 +88,7 @@ public class ChessClient {
             serverFacade.joinGame(new JoinGameRequest(gameIDs.get(id), color, new AuthData(authToken, null)));
             ChessGame chessGame = getBoard(gameIDs.get(id), authToken);
             return new UIResponse("Successfully joined game " + id +" as team "
-                    +color + ".\n" + printBoard(gameIDs.get(id), color, authToken, chessGame), authToken);
+                    +color + ".\n" + printBoard(color, chessGame), authToken);
         } catch(ResponseException e){
             return handleError(e, null);
         }
@@ -100,7 +100,7 @@ public class ChessClient {
         }
         try {
             ChessGame chessGame = getBoard(gameIDs.get(id), authToken);
-            return new UIResponse("Now observing game " + id + "\n" + printBoard(gameIDs.get(id), WHITE, authToken, chessGame), authToken);
+            return new UIResponse("Now observing game " + id + "\n" + printBoard(WHITE, chessGame), authToken);
         } catch(ResponseException e){
             return handleError(e, null);
         }
