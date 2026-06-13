@@ -230,8 +230,8 @@ public class ClientMain {
                 reply.append("Expecting ").append(ClientUI.bold("move <Starting Position> <Ending Position>"));
             }
             else{
-                if(Pattern.matches("[a-h][1-8]", words[1]) &&
-                    Pattern.matches("[a-h][1-8]", words[2])){
+                if(Pattern.matches("[a-h][1-8]", words[1].toLowerCase()) &&
+                    Pattern.matches("[a-h][1-8]", words[2].toLowerCase())){
                     //call move maker, check if valid
                     //check moves to see if valid, starting a-h
                     //query server, print out new board, notification that move was made.

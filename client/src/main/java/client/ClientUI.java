@@ -44,12 +44,17 @@ public class ClientUI {
             uiOutput.append(bold("LOGOUT            ")).append(": Sign out of account\n");
             uiOutput.append(bold("HELP              ")).append(": See List of Commands\n");
         } else if(state == PLAYING_GAME){
-            //TO DO
-            uiOutput.append(bold("LEAVE ")).append(": Leave game\n");
-            uiOutput.append(bold("HELP  ")).append(": See List of Commands\n");
+            uiOutput.append(bold("MOVE <Start Position> <End Position> ")).append(": Move the piece at Start Position to End Position (ex. MOVE a2 a3)\n");
+            uiOutput.append(bold("HIGHLIGHT <Piece Position>           ")).append(": Highlight all possible moves for the piece at Piece Position\n");
+            uiOutput.append(bold("REDRAW                               ")).append(": Redraw the chess board\n");
+            uiOutput.append(bold("LEAVE                                ")).append(": Leave game\n");
+            uiOutput.append(bold("RESIGN                               ")).append(": Forfeit the game\n");
+            uiOutput.append(bold("HELP                                 ")).append(": See List of Commands\n");
         } else if(state == WATCHING_GAME){
-            uiOutput.append(bold("LEAVE ")).append(": Leave game\n");
-            uiOutput.append(bold("HELP  ")).append(": See List of Commands\n");
+            uiOutput.append(bold("REDRAW                     ")).append(": Redraw the chess board\n");
+            uiOutput.append(bold("HIGHLIGHT <Piece Position> ")).append(": Highlight all possible moves for the piece at Piece Position.\n");
+            uiOutput.append(bold("LEAVE                      ")).append(": Leave game\n");
+            uiOutput.append(bold("HELP                       ")).append(": See List of Commands\n");
         }
         return uiOutput.toString();
     }
