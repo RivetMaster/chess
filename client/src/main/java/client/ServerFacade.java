@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import exceptions.*;
 import model.*;
 import resultsandrequests.*;
+import websocket.commands.UserGameCommand;
+import websocket.commands.UserGameMove;
+import websocket.messages.ServerMessage;
 
 import java.net.*;
 import java.net.http.*;
@@ -66,6 +69,22 @@ public class ServerFacade {
                 request.auth().authToken());
         HttpResponse<String> response = sendRequest(req);
         handleResponse(response, null);
+    }
+
+    public ServerMessage connect(UserGameCommand command){
+        return null;
+    }
+
+    public ServerMessage makeMove(UserGameMove command){
+        return null;
+    }
+
+    public ServerMessage leaveGame(UserGameCommand command){
+        return null;
+    }
+
+    public ServerMessage resignGame(UserGameCommand command){
+        return null;
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {

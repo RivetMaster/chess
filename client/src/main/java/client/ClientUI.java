@@ -14,8 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static chess.ChessGame.TeamColor.BLACK;
-import static chess.ChessGame.TeamColor.WHITE;
+import static chess.ChessGame.TeamColor.*;
 import static client.ClientMain.State.*;
 import static ui.EscapeSequences.*;
 
@@ -164,6 +163,22 @@ public class ClientUI {
         } catch(ResponseException e){
             return handleError(e, null);
         }
+    }
+
+    public UIResponse connect(){
+        return null;
+    }
+
+    public UIResponse makeMove(){
+        return null;
+    }
+
+    public UIResponse leaveGame(){
+        return null;
+    }
+
+    public UIResponse resign(){
+        return null;
     }
 
     private void updateGameIDList(String authToken) throws ResponseException{

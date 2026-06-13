@@ -170,6 +170,7 @@ public class ClientMain {
                     if(response.authToken() != null) {
                         authToken = response.authToken();
                         state = PLAYING_GAME;
+                        ui.connect();
                     }
                 } catch (NumberFormatException e) {
                     reply.append(ClientUI.red("Error: Invalid Game ID"));
@@ -191,6 +192,7 @@ public class ClientMain {
                     if(response.authToken() != null) {
                         authToken = response.authToken();
                         state = WATCHING_GAME;
+                        ui.connect();
                     }
                 } catch (NumberFormatException e) {
                     reply.append(ClientUI.red("Error: Invalid Game ID"));
@@ -212,6 +214,7 @@ public class ClientMain {
             else{
                 reply.append("Left game.");
                 //Remove from game, allowing other people to join game
+                UIResponse response = ui.leaveGame();
                 state = SIGNED_IN;
             }
         }
@@ -235,6 +238,8 @@ public class ClientMain {
                     //call move maker, check if valid
                     //check moves to see if valid, starting a-h
                     //query server, print out new board, notification that move was made.
+                    UIResponse response = ui.makeMove();
+                    reply.append("Made Move.");
                 } else{
                     reply.append(ClientUI.red("Error: Invalid move format."));
                 }
@@ -245,6 +250,9 @@ public class ClientMain {
         if(state == WATCHING_GAME && command.equalsIgnoreCase("resign")){
             if(words.length != 1){
                 reply.append("Expecting ").append(ClientUI.bold("resign"));
+            } else{
+                UIResponse response = ui.resign();
+                reply.append("Resigned from game.");
             }
         }
         //HIGHLIGHT legal moves
