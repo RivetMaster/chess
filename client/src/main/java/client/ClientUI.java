@@ -43,8 +43,11 @@ public class ClientUI {
             uiOutput.append(bold("OBSERVE <ID>      ")).append(": Choose a game to watch\n");
             uiOutput.append(bold("LOGOUT            ")).append(": Sign out of account\n");
             uiOutput.append(bold("HELP              ")).append(": See List of Commands\n");
-        } else if(state == IN_GAME){
+        } else if(state == PLAYING_GAME){
             //TO DO
+            uiOutput.append(bold("LEAVE ")).append(": Leave game\n");
+            uiOutput.append(bold("HELP  ")).append(": See List of Commands\n");
+        } else if(state == WATCHING_GAME){
             uiOutput.append(bold("LEAVE ")).append(": Leave game\n");
             uiOutput.append(bold("HELP  ")).append(": See List of Commands\n");
         }

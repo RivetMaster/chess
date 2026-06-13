@@ -6,6 +6,7 @@ import static ui.EscapeSequences.*;
 
 
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import static client.ClientMain.State.*;
 
@@ -17,7 +18,8 @@ public class ClientMain {
     public enum State {
         SIGNED_OUT,
         SIGNED_IN,
-        IN_GAME
+        PLAYING_GAME,
+        WATCHING_GAME
     }
 
     public static void main(String[] args) {
@@ -73,7 +75,7 @@ public class ClientMain {
                 output.append(signedInREPL(words));
             }
             //in game options
-            else if(state == IN_GAME){
+            else if(state == WATCHING_GAME || state == PLAYING_GAME){
                 output.append(inGameREPL(words));
             }
 
@@ -124,6 +126,7 @@ public class ClientMain {
         StringBuilder reply = new StringBuilder();
         String command = words[0];
 
+        //LOGOUT
         if(command.equalsIgnoreCase("logout")){
             if(words.length != 1){
                 reply.append("Expecting ").append(ClientUI.bold("logout"));
@@ -135,21 +138,27 @@ public class ClientMain {
                     state = SIGNED_OUT;
                 }
             }
-        } else if(command.equalsIgnoreCase("create")){
+        }
+        //CREATE GAME
+        else if(command.equalsIgnoreCase("create")){
             if(words.length != 2){
                 reply.append("Expecting ").append(ClientUI.bold("create <NAME>"));
             } else{
                 String response = ui.create(words[1], authToken);
                 reply.append(response);
             }
-        } else if(command.equalsIgnoreCase("list")){
+        }
+        //LIST GAMES
+        else if(command.equalsIgnoreCase("list")){
             if(words.length != 1){
                 reply.append("Expecting ").append(ClientUI.bold("list"));
             } else{
                 String response = ui.list(authToken);
                 reply.append(response);
             }
-        } else if(command.equalsIgnoreCase("join")){
+        }
+        // JOIN GAME
+        else if(command.equalsIgnoreCase("join")){
             if(words.length != 3){
                 reply.append("Expecting ").append(ClientUI.bold( "join <ID> <COLOR>"));
             } else{
@@ -160,7 +169,7 @@ public class ClientMain {
                     reply.append(response.message());
                     if(response.authToken() != null) {
                         authToken = response.authToken();
-                        state = IN_GAME;
+                        state = PLAYING_GAME;
                     }
                 } catch (NumberFormatException e) {
                     reply.append(ClientUI.red("Error: Invalid Game ID"));
@@ -169,7 +178,9 @@ public class ClientMain {
                             + " or " + ClientUI.bold("BLACK") + "."));
                 }
             }
-        } else if(command.equalsIgnoreCase("observe")){
+        }
+        //OBSERVE GAME
+        else if(command.equalsIgnoreCase("observe")){
             if(words.length != 2){
                 reply.append("Expecting ").append(ClientUI.bold("observe <ID>"));
             } else{
@@ -179,7 +190,7 @@ public class ClientMain {
                     reply.append(response.message());
                     if(response.authToken() != null) {
                         authToken = response.authToken();
-                        state = IN_GAME;
+                        state = WATCHING_GAME;
                     }
                 } catch (NumberFormatException e) {
                     reply.append(ClientUI.red("Error: Invalid Game ID"));
@@ -193,16 +204,62 @@ public class ClientMain {
         StringBuilder reply = new StringBuilder();
         String command = words[0];
 
+        //LEAVE
         if(command.equalsIgnoreCase("leave")){
             if(words.length != 1){
                 reply.append("Expecting ").append(ClientUI.bold("leave"));
             }
             else{
                 reply.append("Left game.");
+                //Remove from game, allowing other people to join game
                 state = SIGNED_IN;
             }
         }
+        //REDRAW
+        if(command.equalsIgnoreCase("redraw")){
+            if(words.length != 1){
+                reply.append("Expecting ").append(ClientUI.bold("redraw"));
+            }
+            else{
+                //query server for the board, server should have list of what game they're in
+            }
+        }
+        //MOVE
+        if(state == PLAYING_GAME && command.equalsIgnoreCase("move")){
+            if(words.length != 3){
+                reply.append("Expecting ").append(ClientUI.bold("move <Starting Position> <Ending Position>"));
+            }
+            else{
+                if(Pattern.matches("[a-h][1-8]", words[1]) &&
+                    Pattern.matches("[a-h][1-8]", words[2])){
+                    //call move maker, check if valid
+                    //check moves to see if valid, starting a-h
+                    //query server, print out new board, notification that move was made.
+                } else{
+                    reply.append(ClientUI.red("Error: Invalid move format."));
+                }
 
+            }
+        }
+        //RESIGN
+        if(state == WATCHING_GAME && command.equalsIgnoreCase("resign")){
+            if(words.length != 1){
+                reply.append("Expecting ").append(ClientUI.bold("resign"));
+            }
+        }
+        //HIGHLIGHT legal moves
+        if(command.equalsIgnoreCase("highlight")){
+            if(words.length != 2){
+                reply.append("Expecting ").append(ClientUI.bold("highlight <Piece Position>"));
+            }
+            else{
+                if(Pattern.matches("[a-h][1-8]", words[1])){
+
+                } else{
+                    reply.append(ClientUI.red("Error: Invalid move format."));
+                }
+            }
+        }
         return reply.toString();
     }
 }
