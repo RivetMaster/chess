@@ -1,7 +1,9 @@
 package WebSocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import websocket.messages.ServerMessage;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -20,13 +22,22 @@ public class ConnectionManager {
         connections.get(id).remove(session);
     }
 
-    public void broadcast(Session excludeSession, ServerMessage notification, int id) throws IOException {
-        String msg = notification.toString();
+    public void broadcast(Session excludeSession, Notification notification, int id) throws IOException {
+        String msg = new Gson().toJson(notification);
         for (Session c : connections.get(id)) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {
                     c.getRemote().sendString(msg);
                 }
+            }
+        }
+    }
+
+    public void sendGame(LoadGame gameMsg, int id) throws IOException {
+        String gameJson = new Gson().toJson(gameMsg);
+        for (Session c : connections.get(id)) {
+            if (c.isOpen()) {
+                c.getRemote().sendString(gameJson);
             }
         }
     }

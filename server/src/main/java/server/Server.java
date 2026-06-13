@@ -41,7 +41,7 @@ public class Server {
 
         serialize = new Gson();
 
-        webSocketHandler = new WebSocketHandler(gameDAO);
+        webSocketHandler = new WebSocketHandler(gameDAO, gameServ, authServ);
 
         //create javalin object, takes in config (http response and request object), if path matches file name in
         // web will return contents of that file
