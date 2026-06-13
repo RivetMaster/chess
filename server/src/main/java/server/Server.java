@@ -1,5 +1,6 @@
 package server;
 
+import WebSocket.WebSocketHandler;
 import com.google.gson.Gson;
 import dataaccess.*;
 import exceptions.*;
@@ -19,6 +20,8 @@ public class Server {
     private final GameService gameServ;
     private final DBService dbServ;
     private final Gson serialize;
+    private final WebSocketHandler webSocketHandler;
+
 
     public Server() {
         AuthDAO authDAO = new AuthMemoryDAO();
@@ -38,6 +41,8 @@ public class Server {
 
         serialize = new Gson();
 
+        webSocketHandler = new WebSocketHandler(gameDAO);
+
         //create javalin object, takes in config (http response and request object), if path matches file name in
         // web will return contents of that file
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
@@ -48,6 +53,11 @@ public class Server {
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
+                .ws("/ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                })
                 .exception(InvalidAuthTokenException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(InvalidLogInException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 401))
                 .exception(DataAccessException.class, (Exception e, Context ctx) -> exceptionHandler(e, ctx, 500))
