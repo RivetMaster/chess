@@ -54,6 +54,13 @@ public class ChessMove {
         return String.format("{%s, %s, %s}", getStartPosition(), getEndPosition(), getPromotionPiece());
     }
 
+    public String moveString(){
+        String starting = String.format("%s%d", start.getColumnLetter(), start.getRow());
+        String ending = String.format("%s%d", end.getColumnLetter(), end.getRow());
+        return starting +" " +ending;
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
