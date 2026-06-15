@@ -20,6 +20,7 @@ public class ChessGame {
     private TeamColor turn; //current team whose turn it is
     private TeamStatus whiteStatus; //game status of white side
     private TeamStatus blackStatus; // game status of black side
+    private GameStatus status;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -27,6 +28,7 @@ public class ChessGame {
         turn = WHITE;
         whiteStatus = PLAYING;
         blackStatus = PLAYING;
+        status = GameStatus.WAITING;
     }
 
     /**
@@ -62,6 +64,21 @@ public class ChessGame {
         IN_CHECKMATE,
         STALEMATE,
     }
+
+    public enum GameStatus {
+        WAITING,
+        PLAYING,
+        GAME_OVER
+    }
+
+    public GameStatus getStatus(){
+        return status;
+    }
+
+    public void setGameStatus(GameStatus status) {
+        this.status = status;
+    }
+
     /**
      * Gets all valid moves for a piece at the given location
      *
@@ -162,12 +179,17 @@ public class ChessGame {
                 board.addPiece(move.getEndPosition(), temp);
             }
             board.addPiece(move.getStartPosition(), null); //remove starting piece from board
+
+            checkStatus(WHITE);
+            checkStatus(BLACK);
+            updateGameStatus();
             //change team turn
             if(teamColor == WHITE){
                 turn = BLACK;
             } else{
                 turn = WHITE;
             }
+
         } else{
             throw new InvalidMoveException("Invalid Move");
         }
@@ -293,7 +315,6 @@ public class ChessGame {
         //check for checkmate
         if(getStatus(teamColor) == IN_CHECK && kingCantMove && !teamCanMove) {
             setStatus(teamColor, IN_CHECKMATE);
-
         }
         //check for stalemate = not in check or checkmate but no valid moves can be made
         if(!(getStatus(teamColor)==IN_CHECK) && !(getStatus(teamColor)==IN_CHECKMATE)) {
@@ -319,12 +340,23 @@ public class ChessGame {
         }
     }
 
+    public void updateGameStatus(){
+        if(getTeamTurn().equals(WHITE)){
+            if(whiteStatus.equals(IN_CHECKMATE) || blackStatus.equals(IN_CHECKMATE) || whiteStatus.equals(STALEMATE)){
+                status = GameStatus.GAME_OVER;
+            }
+        } else if(whiteStatus.equals(IN_CHECKMATE) || blackStatus.equals(IN_CHECKMATE) || blackStatus.equals(STALEMATE)){
+            status = GameStatus.GAME_OVER;
+        }
+    }
+
     private void setStatus(TeamColor teamColor, TeamStatus status){
         if(teamColor == WHITE){
             whiteStatus = status;
         }
         blackStatus = status;
     }
+
 
     @Override
     public boolean equals(Object o) {

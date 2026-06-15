@@ -3,6 +3,8 @@ package model;
 import chess.ChessGame;
 import chess.ChessGame.TeamColor;
 
+import static chess.ChessGame.GameStatus.PLAYING;
+import static chess.ChessGame.GameStatus.WAITING;
 import static chess.ChessGame.TeamColor.*;
 
 public record GameData(int gameID, String whiteUsername, String blackUsername,
@@ -20,5 +22,13 @@ public record GameData(int gameID, String whiteUsername, String blackUsername,
 
     public GameData setGameID(int newGameID){
         return new GameData(newGameID, whiteUsername, blackUsername, gameName, game);
+    }
+
+    public void setGameStatus() {
+        if(whiteUsername != null && blackUsername != null && game.getStatus().equals(WAITING)){
+            game.setGameStatus(PLAYING);
+        } else if(game.getStatus().equals(PLAYING) && (whiteUsername == null || blackUsername == null)){
+            game.setGameStatus(WAITING);
+        }
     }
 }
