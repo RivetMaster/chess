@@ -38,4 +38,13 @@ public class ConnectionManager {
             session.getRemote().sendString(toSend);
         }
     }
+
+    public boolean contains(Session session, int id) {
+        for(Session c : connections.get(id)){
+            if(c.equals(session)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

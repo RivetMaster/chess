@@ -20,11 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import resultsandrequests.JoinGameRequest;
 import service.AuthService;
 import service.GameService;
-import websocket.commands.UserGameCommand;
-import websocket.commands.UserGameMove;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
+import websocket.commands.*;
+import websocket.messages.*;
 
 import java.io.IOException;
 
@@ -79,18 +76,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     }
                 }
                 case LEAVE -> {
-                    AuthData auth = new AuthData(action.getAuthToken(), authService.getUsername(action.getAuthToken()));
-                    ChessGame.TeamColor color = null;
-                    if (authService.getUsername(action.getAuthToken()).equals(gameDAO.getGame(action.getGameID()).whiteUsername())) {
-                        color = WHITE;
-                    } else if(authService.getUsername(action.getAuthToken()).equals(gameDAO.getGame(action.getGameID()).blackUsername())){
-                        color = BLACK;
+                    if(authService.verifyAuth(action.getAuthToken())) {
+                        AuthData auth = new AuthData(action.getAuthToken(), authService.getUsername(action.getAuthToken()));
+                        ChessGame.TeamColor color = null;
+                        if (authService.getUsername(action.getAuthToken()).equals(gameDAO.getGame(action.getGameID()).whiteUsername())) {
+                            color = WHITE;
+                        } else if (authService.getUsername(action.getAuthToken()).equals(gameDAO.getGame(action.getGameID()).blackUsername())) {
+                            color = BLACK;
+                        }
+                        if(connections.contains(ctx.session, action.getGameID())){
+                            JoinGameRequest request = new JoinGameRequest(action.getGameID(), color, auth);
+                            leave(request, ctx.session);
+                        } else{
+                            connections.send(new ErrorMessage("Error: Not in Game"), ctx.session);
+                        }
                     }
-                    if(color == null){
-                        throw new InvalidRequestException("Error: Player not in game");
-                    }
-                    JoinGameRequest request = new JoinGameRequest(action.getGameID(), color, auth);
-                    leave(request, ctx.session);
                 }
                 case RESIGN -> {
                     String username = authService.getUsername(action.getAuthToken());
@@ -102,29 +102,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 }
             }
         }
-        catch (InvalidAuthTokenException e){
+        catch (DataAccessException | InvalidMoveException | InvalidRequestException | InvalidAuthTokenException e){
             //send error message
-            try {
-                connections.send(new ErrorMessage("Error: Not Authorized"), ctx.session);
-            } catch(IOException ex){
-                ex.printStackTrace();
-            }
-        } catch (DataAccessException e){
             try {
                 connections.send(new ErrorMessage(String.format("Error: %s", e.getMessage())), ctx.session);
             } catch(IOException ex){
                 ex.printStackTrace();
             }
-        } catch (InvalidMoveException e){
-            //send error message
-            try {
-                connections.send(new ErrorMessage(String.format("Error: %s", e.getMessage())), ctx.session);
-            }catch(IOException ex){
-                ex.printStackTrace();
-            }
-        } catch (InvalidRequestException e){
-            //send error message
-        } catch (IOException ex) {
+        }  catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -136,31 +121,32 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(int gameID, String username, Session session) throws IOException, InvalidRequestException, DataAccessException {
         //send load game message
-        try {
-            ChessGame gameMessage = gameDAO.getGame(gameID).game();
-            LoadGame loadGame = new LoadGame(gameMessage);
-            connections.add(session, gameID);
-            connections.send(loadGame, session);
 
-            //check if user in the game, if in the game send joined as a player, if not joined as observer
-            String message;
-            if(gameDAO.getGame(gameID).whiteUsername().equals(username) || gameDAO.getGame(gameID).blackUsername().equals(username)){
-                message = String.format("%s joined the game", username);
-            } else{
-                message = String.format("%s started watching the game", username);
-            }
-            Notification notification = new Notification(message);
-            connections.broadcast(session, notification, gameID);
-        } catch (InvalidRequestException e){
-            String message = String.format("Error: %s", e.getMessage());
-            ErrorMessage error = new ErrorMessage(message);
-            connections.send(error, session);
+        ChessGame gameMessage = gameDAO.getGame(gameID).game();
+        LoadGame loadGame = new LoadGame(gameMessage);
+        connections.add(session, gameID);
+        connections.send(loadGame, session);
+
+        //check if user in the game, if in the game send joined as a player, if not joined as observer
+        String message;
+        if(gameDAO.getGame(gameID).whiteUsername().equals(username) || gameDAO.getGame(gameID).blackUsername().equals(username)){
+            message = String.format("%s joined the game", username);
+        } else{
+            message = String.format("%s started watching the game", username);
         }
+        Notification notification = new Notification(message);
+        connections.broadcast(session, notification, gameID);
+
     }
 
     private void leave(JoinGameRequest req, Session session) throws IOException, InvalidRequestException, DataAccessException, InvalidAuthTokenException {
-        gameService.leaveGame(req);
-        var message = String.format("%s left the game", req.auth().username());
+        String message;
+        if(req.playerColor() != null) {
+            gameService.leaveGame(req);
+            message = String.format("%s stopped watching the game", req.auth().username());
+        } else {
+            message = String.format("%s left the game", req.auth().username());
+        }
         var notification = new Notification(message);
         connections.broadcast(session, notification, req.gameID());
         connections.remove(session, req.gameID());
