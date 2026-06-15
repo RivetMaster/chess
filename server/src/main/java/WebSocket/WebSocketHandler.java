@@ -93,12 +93,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     }
                 }
                 case RESIGN -> {
-                    String username = authService.getUsername(action.getAuthToken());
-                    String opponent = gameDAO.getGame(action.getGameID()).whiteUsername();
-                    if(username.equals(opponent)) {
-                        opponent = gameDAO.getGame(action.getGameID()).blackUsername();
+                    if(authService.verifyAuth(action.getAuthToken())) {
+                        String username = authService.getUsername(action.getAuthToken());
+
+                        if(gameDAO.getGame(action.getGameID()).game().getStatus() == GAME_OVER){
+                            connections.send(new ErrorMessage("Error: Game Already Over"), ctx.session);
+                        }
+                        else if(connections.contains(ctx.session, action.getGameID())){
+                            if(username.equals(gameDAO.getGame(action.getGameID()).blackUsername()) ||
+                                    username.equals(gameDAO.getGame(action.getGameID()).whiteUsername())) {
+                                resign(action, username, action.getGameID());
+                            } else{
+                                connections.send(new ErrorMessage("Error: Can't resign as observer"), ctx.session);
+                            }
+                        } else{
+                            connections.send(new ErrorMessage("Error: Not in Game"), ctx.session);
+                        }
+
                     }
-                    resign(username, opponent, action.getGameID(), ctx.session);
                 }
             }
         }
@@ -119,7 +131,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(int gameID, String username, Session session) throws IOException, InvalidRequestException, DataAccessException {
+    private void connect(int gameID, String username, Session session)
+            throws IOException, InvalidRequestException, DataAccessException {
         //send load game message
 
         ChessGame gameMessage = gameDAO.getGame(gameID).game();
@@ -129,9 +142,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         //check if user in the game, if in the game send joined as a player, if not joined as observer
         String message;
-        if(gameDAO.getGame(gameID).whiteUsername().equals(username) || gameDAO.getGame(gameID).blackUsername().equals(username)){
-            message = String.format("%s joined the game", username);
-        } else{
+        if(gameDAO.getGame(gameID).whiteUsername().equals(username)){
+            message = String.format("%s joined the game as White", username);
+        } else if (gameDAO.getGame(gameID).blackUsername().equals(username)) {
+            message = String.format("%s joined the game as Black", username);
+        }else{
             message = String.format("%s started watching the game", username);
         }
         Notification notification = new Notification(message);
@@ -139,7 +154,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void leave(JoinGameRequest req, Session session) throws IOException, InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+    private void leave(JoinGameRequest req, Session session)
+            throws IOException, InvalidRequestException, DataAccessException, InvalidAuthTokenException {
         String message;
         if(req.playerColor() != null) {
             gameService.leaveGame(req);
@@ -152,11 +168,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(session, req.gameID());
     }
 
-    public void makeMove(UserGameMove command, String username, ChessGame.TeamColor color, Session session) throws IOException, DataAccessException, InvalidMoveException, InvalidRequestException {
+    public void makeMove(UserGameMove command, String username, ChessGame.TeamColor color, Session session)
+            throws IOException, DataAccessException, InvalidMoveException, InvalidRequestException {
         //check that can make move, turn, both players in game
         GameData gameData = gameDAO.getGame(command.getGameID());
         ChessGame game = gameData.game();
-        gameData.setGameStatus();
+        gameData.updateGameStatus();
 
         if(game.getStatus().equals(WAITING)){
             connections.send(new ErrorMessage("Error: Game needs two players to play game"), session);
@@ -170,7 +187,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         else {
             //make move
             game.makeMove(command.getMove());
-            GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+            GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(),
+                    gameData.blackUsername(), gameData.gameName(), game);
             gameDAO.updateGame(command.getGameID(), updatedGame);
             //send load game message
             LoadGame loadGameMessage = new LoadGame(updatedGame.game());
@@ -208,9 +226,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(String username, String opponent, int id, Session session) throws IOException {
+    private void resign(UserGameCommand command, String username, int id)
+            throws IOException, InvalidRequestException, DataAccessException {
+        String opponent = gameDAO.getGame(command.getGameID()).whiteUsername();
+        if (username.equals(opponent)) {
+            opponent = gameDAO.getGame(command.getGameID()).blackUsername();
+        }
+        GameData data = gameDAO.getGame(id);
+        ChessGame game = gameDAO.getGame(id).game();
+        game.setGameStatus(GAME_OVER);
+        gameDAO.updateGame(id, new GameData(id, data.whiteUsername(), data.blackUsername(),
+                data.gameName(), game));
+
         var message = String.format("%s resigned. %s wins!", username, opponent);
         var notification = new Notification(message);
-        connections.broadcast(session, notification, id);
+        connections.broadcast(null, notification, id);
     }
 }

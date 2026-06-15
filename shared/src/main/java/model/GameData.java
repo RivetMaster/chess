@@ -24,7 +24,7 @@ public record GameData(int gameID, String whiteUsername, String blackUsername,
         return new GameData(newGameID, whiteUsername, blackUsername, gameName, game);
     }
 
-    public void setGameStatus() {
+    public void updateGameStatus() {
         if(whiteUsername != null && blackUsername != null && game.getStatus().equals(WAITING)){
             game.setGameStatus(PLAYING);
         } else if(game.getStatus().equals(PLAYING) && (whiteUsername == null || blackUsername == null)){

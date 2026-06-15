@@ -45,13 +45,13 @@ public class GameService {
         if(req.playerColor() == WHITE){
             if(game.whiteUsername() == null){
                 gameDAO.addPlayer(req.gameID(), req.playerColor(), req.auth().username());
-                game.setGameStatus();
+                game.updateGameStatus();
                 return;
             }
         } else {
             if(game.blackUsername() == null){
                 gameDAO.addPlayer(req.gameID(), req.playerColor(), req.auth().username());
-                game.setGameStatus();
+                game.updateGameStatus();
                 return;
             }
         }
@@ -63,11 +63,11 @@ public class GameService {
         GameData game = gameDAO.getGame(req.gameID());
         if(req.playerColor() == WHITE && game.whiteUsername() != null && game.whiteUsername().equals(req.auth().username())){
             gameDAO.addPlayer(req.gameID(), req.playerColor(), null);
-            game.setGameStatus();
+            game.updateGameStatus();
         }
         else if(req.playerColor() == BLACK && game.blackUsername() != null && game.blackUsername().equals(req.auth().username())){
             gameDAO.addPlayer(req.gameID(), req.playerColor(), null);
-            game.setGameStatus();
+            game.updateGameStatus();
         } else {
             throw new InvalidRequestException("Couldn't Leave Game");
         }
