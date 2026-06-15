@@ -1,8 +1,6 @@
 package WebSocket;
 
 import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.GameDAO;
