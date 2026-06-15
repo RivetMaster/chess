@@ -1,4 +1,4 @@
-package WebSocket;
+package websocket;
 
 import chess.ChessGame;
 import chess.InvalidMoveException;
@@ -63,53 +63,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case MAKE_MOVE -> {
                     if(authService.verifyAuth(action.getAuthToken())) {
                         String username = authService.getUsername(action.getAuthToken());
-
-                        if(username.equals(gameDAO.getGame(action.getGameID()).blackUsername())) {
-                            UserGameMove command = new Gson().fromJson(ctx.message(), UserGameMove.class);
-                            makeMove(command, username, BLACK, ctx.session);
-                        } else if(username.equals(gameDAO.getGame(action.getGameID()).whiteUsername())){
-                            UserGameMove command = new Gson().fromJson(ctx.message(), UserGameMove.class);
-                            makeMove(command, username, WHITE, ctx.session);
-                        }else {
-                            connections.send(new ErrorMessage("Error: Not Player in Game"), ctx.session);
-                        }
+                        UserGameMove command = new Gson().fromJson(ctx.message(), UserGameMove.class);
+                        makeMove(command, username, ctx.session);
                     }
                 }
                 case LEAVE -> {
-                    if(authService.verifyAuth(action.getAuthToken())) {
+                    if(authService.verifyAuth(action.getAuthToken()) && connections.contains(ctx.session, action.getGameID())) {
                         AuthData auth = new AuthData(action.getAuthToken(), authService.getUsername(action.getAuthToken()));
-                        ChessGame.TeamColor color = null;
-                        if (authService.getUsername(action.getAuthToken()).equals(gameDAO.getGame(action.getGameID()).whiteUsername())) {
-                            color = WHITE;
-                        } else if (authService.getUsername(action.getAuthToken()).equals(gameDAO.getGame(action.getGameID()).blackUsername())) {
-                            color = BLACK;
-                        }
-                        if(connections.contains(ctx.session, action.getGameID())){
-                            JoinGameRequest request = new JoinGameRequest(action.getGameID(), color, auth);
-                            leave(request, ctx.session);
-                        } else{
-                            connections.send(new ErrorMessage("Error: Not in Game"), ctx.session);
-                        }
+                        JoinGameRequest request = new JoinGameRequest(action.getGameID(), null, auth);
+                        leave(request, ctx.session);
+                    } else{
+                        connections.send(new ErrorMessage("Error: Not in Game"), ctx.session);
                     }
                 }
                 case RESIGN -> {
-                    if(authService.verifyAuth(action.getAuthToken())) {
+                    if(authService.verifyAuth(action.getAuthToken()) && connections.contains(ctx.session, action.getGameID())) {
                         String username = authService.getUsername(action.getAuthToken());
-
-                        if(gameDAO.getGame(action.getGameID()).game().getStatus() == GAME_OVER){
-                            connections.send(new ErrorMessage("Error: Game Already Over"), ctx.session);
-                        }
-                        else if(connections.contains(ctx.session, action.getGameID())){
-                            if(username.equals(gameDAO.getGame(action.getGameID()).blackUsername()) ||
-                                    username.equals(gameDAO.getGame(action.getGameID()).whiteUsername())) {
-                                resign(action, username, action.getGameID());
-                            } else{
-                                connections.send(new ErrorMessage("Error: Can't resign as observer"), ctx.session);
-                            }
-                        } else{
-                            connections.send(new ErrorMessage("Error: Not in Game"), ctx.session);
-                        }
-
+                        resign(action, username, action.getGameID(), ctx.session);
+                    } else{
+                        connections.send(new ErrorMessage("Error: Not in Game"), ctx.session);
                     }
                 }
             }
@@ -156,26 +128,42 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void leave(JoinGameRequest req, Session session)
             throws IOException, InvalidRequestException, DataAccessException, InvalidAuthTokenException {
+        ChessGame.TeamColor color = null;
+        if (authService.getUsername(req.auth().authToken()).equals(gameDAO.getGame(req.gameID()).whiteUsername())) {
+            color = WHITE;
+        } else if (authService.getUsername(req.auth().authToken()).equals(gameDAO.getGame(req.gameID()).blackUsername())) {
+            color = BLACK;
+        }
+
         String message;
-        if(req.playerColor() != null) {
-            gameService.leaveGame(req);
-            message = String.format("%s stopped watching the game", req.auth().username());
-        } else {
+        if(color != null) {
+            gameService.leaveGame(new JoinGameRequest(req.gameID(), color, req.auth()));
             message = String.format("%s left the game", req.auth().username());
+        } else {
+            message = String.format("%s stopped watching the game", req.auth().username());
         }
         var notification = new Notification(message);
         connections.broadcast(session, notification, req.gameID());
         connections.remove(session, req.gameID());
     }
 
-    public void makeMove(UserGameMove command, String username, ChessGame.TeamColor color, Session session)
+    public void makeMove(UserGameMove command, String username, Session session)
             throws IOException, DataAccessException, InvalidMoveException, InvalidRequestException {
         //check that can make move, turn, both players in game
         GameData gameData = gameDAO.getGame(command.getGameID());
         ChessGame game = gameData.game();
         gameData.updateGameStatus();
+        ChessGame.TeamColor color = null;
 
-        if(game.getStatus().equals(WAITING)){
+        if(username.equals(gameDAO.getGame(command.getGameID()).blackUsername())) {
+            color = BLACK;
+        } else if(username.equals(gameDAO.getGame(command.getGameID()).whiteUsername())){
+            color = WHITE;
+        }
+
+        if (color == null) {
+            connections.send(new ErrorMessage("Error: Not Player in Game"), session);
+        } else if(game.getStatus().equals(WAITING)){
             connections.send(new ErrorMessage("Error: Game needs two players to play game"), session);
         } else if (game.getStatus().equals(GAME_OVER)){
             connections.send(new ErrorMessage("Error: Game Over"), session);
@@ -226,20 +214,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(UserGameCommand command, String username, int id)
+    private void resign(UserGameCommand command, String username, int id, Session session)
             throws IOException, InvalidRequestException, DataAccessException {
-        String opponent = gameDAO.getGame(command.getGameID()).whiteUsername();
-        if (username.equals(opponent)) {
-            opponent = gameDAO.getGame(command.getGameID()).blackUsername();
-        }
-        GameData data = gameDAO.getGame(id);
-        ChessGame game = gameDAO.getGame(id).game();
-        game.setGameStatus(GAME_OVER);
-        gameDAO.updateGame(id, new GameData(id, data.whiteUsername(), data.blackUsername(),
-                data.gameName(), game));
+        if(gameDAO.getGame(id).game().getStatus() == GAME_OVER){
+            connections.send(new ErrorMessage("Error: Game Already Over"), session);
+        } else if(!username.equals(gameDAO.getGame(id).blackUsername()) &&
+                !username.equals(gameDAO.getGame(id).whiteUsername())) {
+            connections.send(new ErrorMessage("Error: Can't resign as observer"), session);
+        } else {
+            String opponent = gameDAO.getGame(command.getGameID()).whiteUsername();
+            if (username.equals(opponent)) {
+                opponent = gameDAO.getGame(command.getGameID()).blackUsername();
+            }
+            GameData data = gameDAO.getGame(id);
+            ChessGame game = gameDAO.getGame(id).game();
+            game.setGameStatus(GAME_OVER);
+            gameDAO.updateGame(id, new GameData(id, data.whiteUsername(), data.blackUsername(),
+                    data.gameName(), game));
 
-        var message = String.format("%s resigned. %s wins!", username, opponent);
-        var notification = new Notification(message);
-        connections.broadcast(null, notification, id);
+            var message = String.format("%s resigned. %s wins!", username, opponent);
+            var notification = new Notification(message);
+            connections.broadcast(null, notification, id);
+        }
     }
 }

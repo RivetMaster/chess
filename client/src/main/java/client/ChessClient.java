@@ -5,6 +5,8 @@ import exceptions.ResponseException;
 import model.AuthData;
 import model.GameData;
 import resultsandrequests.*;
+import websocket.commands.UserGameCommand;
+import websocket.commands.UserGameMove;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,18 +109,22 @@ public class ChessClient {
     }
 
     public UIResponse connect(){
+        serverFacade.connect(new UserGameCommand(null, null, 0));
         return null;
     }
 
     public UIResponse makeMove(){
+        serverFacade.makeMove(new UserGameMove(null, null, null));
         return null;
     }
 
     public UIResponse leaveGame(){
+        serverFacade.leaveGame(new UserGameCommand(null, null, 0));
         return null;
     }
 
     public UIResponse resign(){
+        serverFacade.resignGame(new UserGameCommand(null, null, 0));
         return null;
     }
 

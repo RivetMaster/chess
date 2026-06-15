@@ -161,24 +161,25 @@ public class Client {
                 if (words.length != 3) {
                     reply.append("Expecting ").append(ClientUI.bold("join <ID> <COLOR>"));
                 } else {
+                    int id = 0;
+                    ChessGame.TeamColor color = null;
                     try {
                         //parse gameID and color
-                        int id = Integer.parseInt(words[1]);
-                        ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(words[2].toUpperCase());
-
-                        UIResponse response = chessClient.join(id, color, authToken);
-                        reply.append(response.message());
-                        if (success(response.authToken())) {
-                            authToken = response.authToken();
-                            state = PLAYING_GAME;
-                            chessClient.connect();
-                            gameID = id;
-                        }
+                        id = Integer.parseInt(words[1]);
+                        color = ChessGame.TeamColor.valueOf(words[2].toUpperCase());
                     } catch (NumberFormatException e) {
                         reply.append(ClientUI.red("Error: Invalid Game ID"));
                     } catch (IllegalArgumentException e) {
                         reply.append(ClientUI.red("Error: Invalid color. Expecting " + ClientUI.bold("WHITE")
                                 + " or " + ClientUI.bold("BLACK") + "."));
+                    }
+                    UIResponse response = chessClient.join(id, color, authToken);
+                    reply.append(response.message());
+                    if (success(response.authToken())) {
+                        authToken = response.authToken();
+                        state = PLAYING_GAME;
+                        chessClient.connect();
+                        gameID = id;
                     }
                 }
             }
@@ -187,19 +188,19 @@ public class Client {
                 if (words.length != 2) {
                     reply.append("Expecting ").append(ClientUI.bold("observe <ID>"));
                 } else {
+                    int id = 0;
                     try {
-                        int id = Integer.parseInt(words[1]);
-
-                        UIResponse response = chessClient.observe(id, authToken);
-                        reply.append(response.message());
-                        if (success(response.authToken())) {
-                            authToken = response.authToken();
-                            state = WATCHING_GAME;
-                            chessClient.connect();
-                            gameID = id;
-                        }
+                        id = Integer.parseInt(words[1]);
                     } catch (NumberFormatException e) {
                         reply.append(ClientUI.red("Error: Invalid Game ID"));
+                    }
+                    UIResponse response = chessClient.observe(id, authToken);
+                    reply.append(response.message());
+                    if (success(response.authToken())) {
+                        authToken = response.authToken();
+                        state = WATCHING_GAME;
+                        chessClient.connect();
+                        gameID = id;
                     }
                 }
             }
@@ -234,20 +235,18 @@ public class Client {
             }
             //MOVE
             case("move") -> {
-                if (state == PLAYING_GAME) {
-                    if (words.length != 3) {
-                        reply.append("Expecting ").append(ClientUI.bold("move <Starting Position> <Ending Position>"));
+                if (state == PLAYING_GAME && words.length != 3) {
+                    reply.append("Expecting ").append(ClientUI.bold("move <Starting Position> <Ending Position>"));
+                } else if (state == PLAYING_GAME){
+                    if (Pattern.matches("[a-h][1-8]", words[1].toLowerCase()) &&
+                            Pattern.matches("[a-h][1-8]", words[2].toLowerCase())) {
+                        //call move maker, check if valid
+                        //check moves to see if valid, starting a-h
+                        //query server, print out new board, notification that move was made.
+                        UIResponse response = chessClient.makeMove();
+                        reply.append("Made Move.");
                     } else {
-                        if (Pattern.matches("[a-h][1-8]", words[1].toLowerCase()) &&
-                                Pattern.matches("[a-h][1-8]", words[2].toLowerCase())) {
-                            //call move maker, check if valid
-                            //check moves to see if valid, starting a-h
-                            //query server, print out new board, notification that move was made.
-                            UIResponse response = chessClient.makeMove();
-                            reply.append("Made Move.");
-                        } else {
-                            reply.append(ClientUI.red("Error: Invalid move format."));
-                        }
+                        reply.append(ClientUI.red("Error: Invalid move format."));
                     }
                 }
             }

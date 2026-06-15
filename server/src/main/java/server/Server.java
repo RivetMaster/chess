@@ -1,6 +1,6 @@
 package server;
 
-import WebSocket.WebSocketHandler;
+import websocket.WebSocketHandler;
 import com.google.gson.Gson;
 import dataaccess.*;
 import exceptions.*;
