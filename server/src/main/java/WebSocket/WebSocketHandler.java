@@ -7,7 +7,6 @@ import dataaccess.GameDAO;
 import exceptions.DataAccessException;
 import exceptions.InvalidAuthTokenException;
 import exceptions.InvalidRequestException;
-import exceptions.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -17,18 +16,19 @@ import io.javalin.websocket.WsMessageHandler;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jetbrains.annotations.NotNull;
 import resultsandrequests.JoinGameRequest;
 import service.AuthService;
 import service.GameService;
 import websocket.commands.UserGameCommand;
 import websocket.commands.UserGameMove;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 
 import java.io.IOException;
 
-import static chess.ChessGame.TeamColor.BLACK;
-import static chess.ChessGame.TeamColor.WHITE;
+import static chess.ChessGame.TeamColor.*;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -55,11 +55,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
-                case CONNECT -> connect(action.getGameID(), action.getAuthToken(), ctx.session);
+                case CONNECT -> {
+                    //verify user
+                    if(authService.verifyAuth(action.getAuthToken())) {
+                        String username = authService.getUsername(action.getAuthToken());
+                        connect(action.getGameID(), username, ctx.session);
+                    }
+                }
                 case MAKE_MOVE -> {
-                    UserGameMove command = new Gson().fromJson(ctx.message(), UserGameMove.class);
-                    String username = authService.getUsername(command.getAuthToken());
-                    makeMove(command, username, ctx.session);
+                    if(authService.verifyAuth(action.getAuthToken())) {
+                        String username = authService.getUsername(action.getAuthToken());
+                        if(username.equals(gameDAO.getGame(action.getGameID()).blackUsername()) ||
+                                username.equals(gameDAO.getGame(action.getGameID()).whiteUsername())) {
+
+                            UserGameMove command = new Gson().fromJson(ctx.message(), UserGameMove.class);
+                            makeMove(command, username, ctx.session);
+                        } else {
+                            connections.send(new ErrorMessage("Error: Not Player in Game"), ctx.session);
+                        }
+                    } else{
+                        connections.send(new ErrorMessage("Error: Not Authorized"), ctx.session);
+                    }
                 }
                 case LEAVE -> {
                     AuthData auth = new AuthData(action.getAuthToken(), authService.getUsername(action.getAuthToken()));
@@ -84,29 +100,52 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     resign(username, opponent, action.getGameID(), ctx.session);
                 }
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (InvalidAuthTokenException e){
+        }
+        catch (InvalidAuthTokenException e){
             //send error message
+            try {
+                connections.send(new ErrorMessage("Error: Not Authorized"), ctx.session);
+            } catch(IOException ex){
+                ex.printStackTrace();
+            }
         } catch (DataAccessException e){
             //send error message
         } catch (InvalidMoveException e){
             //send error message
         } catch (InvalidRequestException e){
             //send error message
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
+    public void handleClose(@NotNull WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
 
-    private void connect(int gameID, String username, Session session) throws IOException {
-        connections.add(session, gameID);
-        var message = String.format("%s joined the game", username); //no bc called when join and when observe
-        var notification = new Notification(message);
-        connections.broadcast(session, notification, gameID);
+    private void connect(int gameID, String username, Session session) throws IOException, InvalidRequestException, DataAccessException {
+        //send load game message
+        try {
+            ChessGame gameMessage = gameDAO.getGame(gameID).game();
+            LoadGame loadGame = new LoadGame(gameMessage);
+            connections.add(session, gameID);
+            connections.send(loadGame, session);
+
+            //check if user in the game, if in the game send joined as a player, if not joined as observer
+            String message;
+            if(gameDAO.getGame(gameID).whiteUsername().equals(username) || gameDAO.getGame(gameID).blackUsername().equals(username)){
+                message = String.format("%s joined the game", username);
+            } else{
+                message = String.format("%s started watching the game", username);
+            }
+            Notification notification = new Notification(message);
+            connections.broadcast(session, notification, gameID);
+        } catch (InvalidRequestException e){
+            String message = String.format("Error: %s", e.getMessage());
+            ErrorMessage error = new ErrorMessage(message);
+            connections.send(error, session);
+        }
     }
 
     private void leave(JoinGameRequest req, Session session) throws IOException, InvalidRequestException, DataAccessException, InvalidAuthTokenException {
@@ -124,12 +163,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         game.makeMove(command.getMove());
         GameData updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
         gameDAO.updateGame(command.getGameID(), updatedGame);
-        var loadGameMessage = new LoadGame(updatedGame);
-        connections.sendGame(loadGameMessage, command.getGameID());
+        var loadGameMessage = new LoadGame(updatedGame.game());
+        connections.send(loadGameMessage, session);
 
         var message = String.format("%s makes move %s", username, command.getMove().moveString());
         var notification = new Notification(message);
-        connections.broadcast(null, notification, command.getGameID());
+        connections.broadcast(session, notification, command.getGameID());
     }
 
     private void resign(String username, String opponent, int id, Session session) throws IOException {
