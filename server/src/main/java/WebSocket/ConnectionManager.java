@@ -22,7 +22,7 @@ public class ConnectionManager {
         connections.get(id).remove(session);
     }
 
-    public void broadcast(Session excludeSession, Notification notification, int id) throws IOException {
+    public void broadcast(Session excludeSession, ServerMessage notification, int id) throws IOException {
         String msg = new Gson().toJson(notification);
         for (Session c : connections.get(id)) {
             if (c.isOpen()) {
