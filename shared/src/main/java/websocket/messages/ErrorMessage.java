@@ -19,7 +19,7 @@ public class ErrorMessage extends ServerMessage {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Notification that)) {
+        if (!(o instanceof ErrorMessage that)) {
             return false;
         }
         return getServerMessageType() == that.getServerMessageType() &&

@@ -68,14 +68,10 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void makeMove(UserGameMove command) throws ResponseException {
-        try {
-            this.session.getBasicRemote().sendText(new Gson().toJson(command));
-        } catch (IOException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-        }
+        send(command);
     }
 
-    private void send(UserGameCommand command) throws ResponseException {
+    private <T extends UserGameCommand> void send(T command) throws ResponseException {
         try {
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {

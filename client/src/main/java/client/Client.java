@@ -263,12 +263,7 @@ public class Client {
                     if (words.length != 1) {
                         reply.append("Expecting ").append(ClientUI.bold("resign"));
                     } else {
-                        if(resignLoop()) {
-                            UIResponse response = chessClient.resign(authToken, gameID);
-                            reply.append(response.message());
-                        } else{
-                            reply.append("\n");
-                        }
+                        reply.append(resignLoop());
                     }
                 }
             }
@@ -288,20 +283,22 @@ public class Client {
         return reply.toString();
     }
 
-    private boolean resignLoop(){
+    private String resignLoop(){
         System.out.println("Are you sure you want to resign? Type y or yes to confirm, anything else to cancel" );
 
         System.out.print(">>>> ");
         String line = scanner.nextLine().trim();
-        StringBuilder output = new StringBuilder();
 
         //split line into words
         String[] words = line.split(" ");
 
         //if nothing was entered
         if(words.length == 0){
-            return false;
-        } else return words[0].equalsIgnoreCase("y") || words[0].equalsIgnoreCase("yes");
+            return "\n";
+        } else if (words[0].equalsIgnoreCase("y") || words[0].equalsIgnoreCase("yes")){
+            return chessClient.resign(authToken, gameID).message();
+        }
+        return "\n";
     }
 
     private boolean success(String authToken){
