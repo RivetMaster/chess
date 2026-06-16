@@ -160,20 +160,7 @@ public class ClientUI {
                 for (int row = 8; row > 0; row--) {
                     boardRow.append(boarderColor(" " + row + " "));
                     for (int col = 1; col <= 8; col++) {
-                        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                        if(!highlights.isEmpty() && highlights.contains(new ChessPosition(row, col))){
-                            boardRow.append(drawPieceHighlight(row, col, piece));
-                        } else if(spot != null && spot.equals(new ChessPosition(row, col))){
-                            boardRow.append(SET_BG_COLOR_YELLOW);
-                            if(piece != null) {
-                                boardRow.append(piece.toStringBoard());
-                            } else{
-                                boardRow.append(EMPTY);
-                            }
-                            boardRow.append(RESET_BG_COLOR);
-                        } else {
-                            boardRow.append(drawPiece(row, col, piece));
-                        }
+                        boardRow.append(drawPieceHelper(row, col, board, spot, highlights));
                     }
                     boardRow.append(boarderColor(" " + row + " ")).append("\n");
                 }
@@ -182,24 +169,30 @@ public class ClientUI {
                 for (int row = 1; row <= 8; row++) {
                     boardRow.append(boarderColor(" " + row + " "));
                     for (int col = 8; col > 0; col--) {
-                        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                        if(!highlights.isEmpty() && highlights.contains(new ChessPosition(row, col))){
-                            boardRow.append(drawPieceHighlight(row, col, piece));
-                        } else if(spot != null && spot.equals(new ChessPosition(row, col))){
-                            boardRow.append(SET_BG_COLOR_YELLOW);
-                            if(piece != null) {
-                                boardRow.append(piece.toStringBoard());
-                            } else{
-                                boardRow.append(EMPTY);
-                            }
-                            boardRow.append(RESET_BG_COLOR);
-                        } else {
-                            boardRow.append(drawPiece(row, col, piece));
-                        }
+                        boardRow.append(drawPieceHelper(row, col, board, spot, highlights));
                     }
                     boardRow.append(boarderColor(" " + row + " ")).append("\n");
                 }
             }
+        }
+        return boardRow.toString();
+    }
+
+    private static String drawPieceHelper(int row, int col, ChessBoard board, ChessPosition spot, ArrayList<ChessPosition> highlights){
+        StringBuilder boardRow = new StringBuilder();
+        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+        if(!highlights.isEmpty() && highlights.contains(new ChessPosition(row, col))){
+            boardRow.append(drawPieceHighlight(row, col, piece));
+        } else if(spot != null && spot.equals(new ChessPosition(row, col))){
+            boardRow.append(SET_BG_COLOR_YELLOW);
+            if(piece != null) {
+                boardRow.append(piece.toStringBoard());
+            } else{
+                boardRow.append(EMPTY);
+            }
+            boardRow.append(RESET_BG_COLOR);
+        } else {
+            boardRow.append(drawPiece(row, col, piece));
         }
         return boardRow.toString();
     }

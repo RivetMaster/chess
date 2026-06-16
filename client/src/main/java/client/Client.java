@@ -17,6 +17,7 @@ public class Client {
     private String authToken;
     private String username;
     private int gameID;
+    private Scanner scanner;
 
     public enum State {
         SIGNED_OUT,
@@ -39,7 +40,7 @@ public class Client {
                 + RESET_TEXT_BOLD_FAINT + " for help getting started. ♕" );
 
         boolean testing = true;
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         state = SIGNED_OUT;
 
         //loop with scanner object
@@ -262,8 +263,12 @@ public class Client {
                     if (words.length != 1) {
                         reply.append("Expecting ").append(ClientUI.bold("resign"));
                     } else {
-                        UIResponse response = chessClient.resign(authToken, gameID);
-                        reply.append(response.message());
+                        if(resignLoop()) {
+                            UIResponse response = chessClient.resign(authToken, gameID);
+                            reply.append(response.message());
+                        } else{
+                            reply.append("\n");
+                        }
                     }
                 }
             }
@@ -281,6 +286,22 @@ public class Client {
             }
         }
         return reply.toString();
+    }
+
+    private boolean resignLoop(){
+        System.out.println("Are you sure you want to resign? Type y or yes to confirm, anything else to cancel" );
+
+        System.out.print(">>>> ");
+        String line = scanner.nextLine().trim();
+        StringBuilder output = new StringBuilder();
+
+        //split line into words
+        String[] words = line.split(" ");
+
+        //if nothing was entered
+        if(words.length == 0){
+            return false;
+        } else return words[0].equalsIgnoreCase("y") || words[0].equalsIgnoreCase("yes");
     }
 
     private boolean success(String authToken){
