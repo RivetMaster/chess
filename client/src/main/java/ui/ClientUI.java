@@ -1,14 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import client.Client;
-import exceptions.ResponseException;
 import model.GameData;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
@@ -84,7 +81,7 @@ public class ClientUI {
         return output.toString();
     }
 
-    public static String printBoard(ChessGame.TeamColor color, ChessGame chessGame) throws ResponseException {
+    public static String printBoard(ChessGame.TeamColor color, ChessGame chessGame) {
         StringBuilder board = new StringBuilder();
         ChessBoard chessBoard = chessGame.getBoard();
         //Boarder Above
@@ -96,7 +93,6 @@ public class ClientUI {
             board.append(boarderColor("    h  g  f  e  d  c  b  a    ")).append("\n");
             board.append(drawBoard(chessBoard, BLACK));
             board.append(boarderColor("    h  g  f  e  d  c  b  a    ")).append("\n");
-
         }
 
         return board.toString();
@@ -106,7 +102,7 @@ public class ClientUI {
         return SET_BG_COLOR_LIGHT_GREY +SET_TEXT_COLOR_BLUE + text + RESET_BG_COLOR +RESET_TEXT_COLOR;
     }
 
-    public static String drawBoard(ChessBoard board, ChessGame.TeamColor color){
+    private static String drawBoard(ChessBoard board, ChessGame.TeamColor color){
         StringBuilder boardRow = new StringBuilder();
         switch(color) {
             case WHITE -> {
@@ -131,6 +127,97 @@ public class ClientUI {
             }
         }
         return boardRow.toString();
+    }
+
+    public static String printBoardHighlight(ChessGame.TeamColor color, ChessGame chessGame, ChessPosition spot) {
+        StringBuilder board = new StringBuilder();
+        ChessBoard chessBoard = chessGame.getBoard();
+        Collection<ChessMove> highlight = chessGame.validMoves(spot);
+        ArrayList<ChessPosition> highlights = new ArrayList<>();
+        if(highlight != null) {
+            for (var h : highlight) {
+                highlights.add(h.getEndPosition());
+            }
+        }
+        //Boarder Above
+        if(color == WHITE){
+            board.append(boarderColor("    a  b  c  d  e  f  g  h    ")).append("\n");
+            board.append(drawBoardHighlighted(chessBoard, WHITE, highlights, spot));
+            board.append(boarderColor("    a  b  c  d  e  f  g  h    ")).append("\n");
+        } else if(color == BLACK){
+            board.append(boarderColor("    h  g  f  e  d  c  b  a    ")).append("\n");
+            board.append(drawBoardHighlighted(chessBoard, BLACK, highlights, spot));
+            board.append(boarderColor("    h  g  f  e  d  c  b  a    ")).append("\n");
+        }
+
+        return board.toString();
+    }
+
+    private static String drawBoardHighlighted(ChessBoard board, ChessGame.TeamColor color, ArrayList<ChessPosition> highlights, ChessPosition spot){
+        StringBuilder boardRow = new StringBuilder();
+        switch(color) {
+            case WHITE -> {
+                for (int row = 8; row > 0; row--) {
+                    boardRow.append(boarderColor(" " + row + " "));
+                    for (int col = 1; col <= 8; col++) {
+                        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                        if(!highlights.isEmpty() && highlights.contains(new ChessPosition(row, col))){
+                            boardRow.append(drawPieceHighlight(row, col, piece));
+                        } else if(spot != null && spot.equals(new ChessPosition(row, col))){
+                            boardRow.append(SET_BG_COLOR_YELLOW);
+                            if(piece != null) {
+                                boardRow.append(piece.toStringBoard());
+                            } else{
+                                boardRow.append(EMPTY);
+                            }
+                            boardRow.append(RESET_BG_COLOR);
+                        } else {
+                            boardRow.append(drawPiece(row, col, piece));
+                        }
+                    }
+                    boardRow.append(boarderColor(" " + row + " ")).append("\n");
+                }
+            }
+            case BLACK -> {
+                for (int row = 1; row <= 8; row++) {
+                    boardRow.append(boarderColor(" " + row + " "));
+                    for (int col = 8; col > 0; col--) {
+                        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                        if(!highlights.isEmpty() && highlights.contains(new ChessPosition(row, col))){
+                            boardRow.append(drawPieceHighlight(row, col, piece));
+                        } else if(spot != null && spot.equals(new ChessPosition(row, col))){
+                            boardRow.append(SET_BG_COLOR_YELLOW);
+                            if(piece != null) {
+                                boardRow.append(piece.toStringBoard());
+                            } else{
+                                boardRow.append(EMPTY);
+                            }
+                            boardRow.append(RESET_BG_COLOR);
+                        } else {
+                            boardRow.append(drawPiece(row, col, piece));
+                        }
+                    }
+                    boardRow.append(boarderColor(" " + row + " ")).append("\n");
+                }
+            }
+        }
+        return boardRow.toString();
+    }
+
+    public static String drawPieceHighlight(int row, int col, ChessPiece chessPiece){
+        StringBuilder piece = new StringBuilder();
+        if (col % 2 != row % 2) {
+            piece.append(SET_BG_COLOR_GREEN); //white square
+        } else {
+            piece.append(SET_BG_COLOR_DARK_GREEN); //black square
+        }
+        if(chessPiece != null) {
+            piece.append(chessPiece.toStringBoard());
+        } else{
+            piece.append(EMPTY);
+        }
+        piece.append(RESET_BG_COLOR);
+        return piece.toString();
     }
 
     public static String drawPiece(int row, int col, ChessPiece chessPiece){

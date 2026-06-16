@@ -91,10 +91,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             try {
                 connections.send(new ErrorMessage(String.format("Error: %s", e.getMessage())), ctx.session);
             } catch(IOException ex){
-                ex.printStackTrace();
+                System.out.println("Couldn't send error message");
+                //ex.printStackTrace();
             }
         }  catch (IOException ex) {
-            ex.printStackTrace();
+           // ex.printStackTrace();
+            System.out.println("Error somewhere else with sending");
         }
     }
 
@@ -114,9 +116,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         //check if user in the game, if in the game send joined as a player, if not joined as observer
         String message;
-        if(gameDAO.getGame(gameID).whiteUsername().equals(username)){
+        String whtUsername = gameDAO.getGame(gameID).whiteUsername();
+        String blkUsername = gameDAO.getGame(gameID).blackUsername();
+        if(whtUsername != null && whtUsername.equals(username)){
             message = String.format("%s joined the game as White", username);
-        } else if (gameDAO.getGame(gameID).blackUsername().equals(username)) {
+        } else if (blkUsername != null && blkUsername.equals(username)) {
             message = String.format("%s joined the game as Black", username);
         }else{
             message = String.format("%s started watching the game", username);
@@ -129,9 +133,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void leave(JoinGameRequest req, Session session)
             throws IOException, InvalidRequestException, DataAccessException, InvalidAuthTokenException {
         ChessGame.TeamColor color = null;
-        if (authService.getUsername(req.auth().authToken()).equals(gameDAO.getGame(req.gameID()).whiteUsername())) {
+        if ( gameDAO.getGame(req.gameID()).whiteUsername() != null &&
+                authService.getUsername(req.auth().authToken()).equals(gameDAO.getGame(req.gameID()).whiteUsername())) {
             color = WHITE;
-        } else if (authService.getUsername(req.auth().authToken()).equals(gameDAO.getGame(req.gameID()).blackUsername())) {
+        } else if (gameDAO.getGame(req.gameID()).blackUsername() != null &&
+                authService.getUsername(req.auth().authToken()).equals(gameDAO.getGame(req.gameID()).blackUsername())) {
             color = BLACK;
         }
 
@@ -155,9 +161,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         gameData.updateGameStatus();
         ChessGame.TeamColor color = null;
 
-        if(username.equals(gameDAO.getGame(command.getGameID()).blackUsername())) {
+        if(gameDAO.getGame(command.getGameID()).blackUsername() != null &&
+                username.equals(gameDAO.getGame(command.getGameID()).blackUsername())) {
             color = BLACK;
-        } else if(username.equals(gameDAO.getGame(command.getGameID()).whiteUsername())){
+        } else if(gameDAO.getGame(command.getGameID()).whiteUsername() != null &&
+                username.equals(gameDAO.getGame(command.getGameID()).whiteUsername())){
             color = WHITE;
         }
 
@@ -169,7 +177,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.send(new ErrorMessage("Error: Game Over"), session);
         }else if(!game.getTeamTurn().equals(color)){
             connections.send(new ErrorMessage("Error: Can only move on your turn"), session);
-        } else if(!game.getBoard().getPiece(command.getMove().getStartPosition()).getTeamColor().equals(color)) {
+        } else if(game.getBoard().getPiece(command.getMove().getStartPosition()) != null &&
+                !game.getBoard().getPiece(command.getMove().getStartPosition()).getTeamColor().equals(color)) {
             connections.send(new ErrorMessage("Error: Can only move your pieces"), session);
         }
         else {
@@ -218,22 +227,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             throws IOException, InvalidRequestException, DataAccessException {
         if(gameDAO.getGame(id).game().getStatus() == GAME_OVER){
             connections.send(new ErrorMessage("Error: Game Already Over"), session);
-        } else if(!username.equals(gameDAO.getGame(id).blackUsername()) &&
-                !username.equals(gameDAO.getGame(id).whiteUsername())) {
+        } else if((gameDAO.getGame(id).blackUsername() == null || !username.equals(gameDAO.getGame(id).blackUsername())) &&
+                (gameDAO.getGame(id).whiteUsername() == null || !username.equals(gameDAO.getGame(id).whiteUsername()))) {
             connections.send(new ErrorMessage("Error: Can't resign as observer"), session);
         } else {
-            String opponent = gameDAO.getGame(command.getGameID()).whiteUsername();
-            if (username.equals(opponent)) {
-                opponent = gameDAO.getGame(command.getGameID()).blackUsername();
+            String opponent = null;
+            if(gameDAO.getGame(command.getGameID()).whiteUsername() != null) {
+                opponent = gameDAO.getGame(command.getGameID()).whiteUsername();
+                if (username.equals(opponent)) {
+                    opponent = gameDAO.getGame(command.getGameID()).blackUsername();
+                }
             }
             GameData data = gameDAO.getGame(id);
             ChessGame game = gameDAO.getGame(id).game();
             game.setGameStatus(GAME_OVER);
             gameDAO.updateGame(id, new GameData(id, data.whiteUsername(), data.blackUsername(),
                     data.gameName(), game));
-
-            var message = String.format("%s resigned. %s wins!", username, opponent);
-            var notification = new Notification(message);
+            String message;
+            if(opponent != null) {
+                message = String.format("%s resigned. %s wins!", username, opponent);
+            } else{
+                message = String.format("%s resigned.", username);
+            }
+            Notification notification = new Notification(message);
             connections.broadcast(null, notification, id);
         }
     }

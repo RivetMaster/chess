@@ -1,12 +1,17 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import exceptions.ResponseException;
 import model.AuthData;
 import model.GameData;
 import resultsandrequests.*;
 import websocket.commands.UserGameCommand;
 import websocket.commands.UserGameMove;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,13 +20,16 @@ import java.util.Map;
 import static chess.ChessGame.TeamColor.*;
 import static ui.ClientUI.*;
 
-public class ChessClient {
+public class ChessClient implements ServerMessageHandler{
     ServerFacade serverFacade;
     Map<Integer, Integer> gameIDs;
+    ChessGame.TeamColor color;
+    WebSocketFacade ws;
 
-    public ChessClient(ServerFacade serverFacade){
+    public ChessClient(ServerFacade serverFacade) throws ResponseException {
         this.serverFacade = serverFacade;
         gameIDs = new HashMap<>();
+        ws = new WebSocketFacade(serverFacade.getServerUrl(), this);
     }
 
     public UIResponse register(String username, String password, String email){
@@ -83,49 +91,107 @@ public class ChessClient {
     }
 
     public UIResponse join(int id, ChessGame.TeamColor color, String authToken) {
-        if(!gameIDs.containsKey(id)){
-            return new UIResponse(red("Error: Invalid Game ID"), null);
-        }
         try{
+            updateGameIDList(authToken);
+            if(!gameIDs.containsKey(id)){
+                return new UIResponse(red("Error: Invalid Game ID"), null);
+            }
             serverFacade.joinGame(new JoinGameRequest(gameIDs.get(id), color, new AuthData(authToken, null)));
-            ChessGame chessGame = getBoard(gameIDs.get(id), authToken);
+            this.color = color;
             return new UIResponse("Successfully joined game " + id +" as team "
-                    +color + ".\n" + printBoard(color, chessGame), authToken);
+                    +color, authToken);
         } catch(ResponseException e){
             return handleError(e, null);
         }
     }
 
     public UIResponse observe(int id, String authToken){
-        if(!gameIDs.containsKey(id)){
-            return new UIResponse(red("Error: Invalid Game ID"), null);
-        }
         try {
-            ChessGame chessGame = getBoard(gameIDs.get(id), authToken);
-            return new UIResponse("Now observing game " + id + "\n" + printBoard(WHITE, chessGame), authToken);
+            updateGameIDList(authToken);
+            if (!gameIDs.containsKey(id)) {
+                return new UIResponse(red("Error: Invalid Game ID"), null);
+            }
+            color = WHITE;
+            return new UIResponse("Now observing game " + id, authToken);
         } catch(ResponseException e){
             return handleError(e, null);
         }
     }
 
-    public UIResponse connect(){
-        serverFacade.connect(new UserGameCommand(null, null, 0));
-        return null;
+    public void connect(String authToken, int gameID){
+        try {
+            ws.connect(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
+        } catch(ResponseException e) {
+            System.out.println(handleError(e, null).message());
+        }
     }
 
-    public UIResponse makeMove(){
-        serverFacade.makeMove(new UserGameMove(null, null, null));
-        return null;
+    public void makeMove(String authToken, int id, String start, String end){
+        ChessMove move = new ChessMove(toPos(start), toPos(end));
+        try {
+            ws.makeMove(new UserGameMove(authToken, id, move));
+        } catch(ResponseException e){
+            System.out.println(red(handleError(e, null).message()));
+        }
     }
 
-    public UIResponse leaveGame(){
-        serverFacade.leaveGame(new UserGameCommand(null, null, 0));
-        return null;
+    public ChessPosition toPos(String letterNotation){
+        String letterCol = letterNotation.substring(0, 1).toLowerCase();
+        int row = Integer.parseInt(letterNotation.substring(1));
+        int col = 0;
+        switch(letterCol){
+            case("a") -> col = 1;
+            case("b") -> col = 2;
+            case("c") -> col = 3;
+            case("d") -> col = 4;
+            case("e") -> col = 5;
+            case("f") -> col = 6;
+            case("g") -> col = 7;
+            case("h") -> col = 8;
+        }
+        return new ChessPosition(row, col);
     }
 
-    public UIResponse resign(){
-        serverFacade.resignGame(new UserGameCommand(null, null, 0));
-        return null;
+    public UIResponse leaveGame(String authToken, int id){
+        try {
+            ws.leaveGame(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, id));
+            return new UIResponse("Left game", authToken);
+        } catch(ResponseException e) {
+            return handleError(e, null);
+        }
+    }
+
+    public UIResponse resign(String authToken, int id){
+        try {
+            ws.resignGame(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, id));
+            return new UIResponse("Resigned from game", authToken);
+        } catch(ResponseException e) {
+            return handleError(e, null);
+        }
+    }
+
+    public String redrawBoard(int gameID, String authToken) {
+        String response;
+        try {
+            response = printBoard(color, getBoard(gameID, authToken));
+        } catch (ResponseException e){
+            response = handleError(e, null).message();
+        }
+        return response;
+    }
+
+    public String highlightBoard(int gameID, String authToken, ChessPosition pos) {
+        String response;
+        try {
+            if(getBoard(gameID, authToken).getBoard().getPiece(pos) != null) {
+                response = printBoardHighlight(color, getBoard(gameID, authToken), pos);
+            } else{
+                response = "No piece found to highlight";
+            }
+        } catch (ResponseException e){
+            response = handleError(e, null).message();
+        }
+        return response;
     }
 
     private void updateGameIDList(String authToken) throws ResponseException{
@@ -162,5 +228,26 @@ public class ChessClient {
             return new UIResponse(red("Error: Could not connect to the server."), authToken);
         }
         return new UIResponse(red(e.getMessage()), authToken);
+    }
+
+    @Override
+    public void notify(Notification notification) {
+        System.out.println();
+        System.out.println(notification.getMessage());
+        System.out.print(">>>> ");
+    }
+
+    @Override
+    public void notifyError(ErrorMessage error) {
+        System.out.println();
+        System.out.println(red(error.getMessage()));
+        System.out.print(">>>> ");
+    }
+
+    @Override
+    public void loadGameNotify(LoadGame game) {
+        System.out.println();
+        System.out.println(printBoard(color, game.getGame()));
+        System.out.print(">>>> ");
     }
 }

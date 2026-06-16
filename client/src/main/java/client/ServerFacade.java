@@ -4,9 +4,6 @@ import com.google.gson.Gson;
 import exceptions.*;
 import model.*;
 import resultsandrequests.*;
-import websocket.commands.UserGameCommand;
-import websocket.commands.UserGameMove;
-import websocket.messages.ServerMessage;
 
 import java.net.*;
 import java.net.http.*;
@@ -71,22 +68,6 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    public ServerMessage connect(UserGameCommand command){
-        return null;
-    }
-
-    public ServerMessage makeMove(UserGameMove command){
-        return null;
-    }
-
-    public ServerMessage leaveGame(UserGameCommand command){
-        return null;
-    }
-
-    public ServerMessage resignGame(UserGameCommand command){
-        return null;
-    }
-
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
@@ -136,6 +117,10 @@ public class ServerFacade {
 
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
+    }
+
+    public String getServerUrl(){
+        return serverUrl;
     }
 
 }

@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessGame;
+import exceptions.ResponseException;
 import resultsandrequests.UIResponse;
 import ui.ClientUI;
 import static client.Client.State.*;
@@ -25,7 +26,11 @@ public class Client {
     }
 
     public Client(ServerFacade server){
-        chessClient = new ChessClient(server);
+        try {
+            chessClient = new ChessClient(server);
+        } catch(ResponseException e){
+            System.out.printf("Unable to start server: %s%n", e.getMessage());
+        }
     }
 
 
@@ -178,7 +183,7 @@ public class Client {
                     if (success(response.authToken())) {
                         authToken = response.authToken();
                         state = PLAYING_GAME;
-                        chessClient.connect();
+                        chessClient.connect(authToken, id);
                         gameID = id;
                     }
                 }
@@ -199,7 +204,7 @@ public class Client {
                     if (success(response.authToken())) {
                         authToken = response.authToken();
                         state = WATCHING_GAME;
-                        chessClient.connect();
+                        chessClient.connect(authToken, id);
                         gameID = id;
                     }
                 }
@@ -218,11 +223,13 @@ public class Client {
                 if (words.length != 1) {
                     reply.append("Expecting ").append(ClientUI.bold("leave"));
                 } else {
-                    reply.append("Left game.");
                     //Remove from game, allowing other people to join game
-                    UIResponse response = chessClient.leaveGame();
-                    state = SIGNED_IN;
-                    gameID = 0;
+                    UIResponse response = chessClient.leaveGame(authToken, gameID);
+                    reply.append(response.message());
+                    if(success(response.authToken())) {
+                        state = SIGNED_IN;
+                        gameID = 0;
+                    }
                 }
             }
             //REDRAW
@@ -231,6 +238,7 @@ public class Client {
                     reply.append("Expecting ").append(ClientUI.bold("redraw"));
                 } else {
                     //query server for the board, server should have list of what game they're in
+                    reply.append(chessClient.redrawBoard(gameID, authToken));
                 }
             }
             //MOVE
@@ -240,11 +248,9 @@ public class Client {
                 } else if (state == PLAYING_GAME){
                     if (Pattern.matches("[a-h][1-8]", words[1].toLowerCase()) &&
                             Pattern.matches("[a-h][1-8]", words[2].toLowerCase())) {
-                        //call move maker, check if valid
                         //check moves to see if valid, starting a-h
-                        //query server, print out new board, notification that move was made.
-                        UIResponse response = chessClient.makeMove();
-                        reply.append("Made Move.");
+                        chessClient.makeMove(authToken, gameID, words[1], words[2]);
+                        reply.append("\n");
                     } else {
                         reply.append(ClientUI.red("Error: Invalid move format."));
                     }
@@ -256,8 +262,8 @@ public class Client {
                     if (words.length != 1) {
                         reply.append("Expecting ").append(ClientUI.bold("resign"));
                     } else {
-                        UIResponse response = chessClient.resign();
-                        reply.append("Resigned from game.");
+                        UIResponse response = chessClient.resign(authToken, gameID);
+                        reply.append(response.message());
                     }
                 }
             }
@@ -267,7 +273,7 @@ public class Client {
                     reply.append("Expecting ").append(ClientUI.bold("highlight <Piece Position>"));
                 } else {
                     if (Pattern.matches("[a-h][1-8]", words[1])) {
-
+                        reply.append(chessClient.highlightBoard(gameID, authToken, chessClient.toPos(words[1])));
                     } else {
                         reply.append(ClientUI.red("Error: Invalid move format."));
                     }
